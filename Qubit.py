@@ -44,17 +44,26 @@ def dec_to_bin(x):
 # NOTE: Qubits will be ROW VECTORS
 class Qubit(np.ndarray):
 
-    def __new__(cls, vec=(1, 0), shape=2):
+    def __new__(cls, name=None, vec=(1, 0), shape=2):
         """
         :param vec: a tuple of ALPHA and BETA, the amplitudes of states |0> and |1>, respectively (default |0>)
         :param shape: ensures the qubit is a 2D vector (i.e. sets the size of the numpy array to 2x1)
         :return: a quantum state with amplitudes ALPHA and BETA
         """
+        valid_names = ['+', '-', 'plus', 'minus']
+        if name == 'plus' or name == '+':
+            return _make_qubit(1/np.sqrt(2), 1/np.sqrt(2))
+        if name == 'minus' or name == '-':
+            return _make_qubit(1/np.sqrt(2), -1/np.sqrt(2))
         alpha = vec[0]
         beta = vec[1]
         return _make_qubit(alpha, beta)
 
-    def __init__(self, vec=(1, 0)):
+    def __init__(self, name, vec=(1, 0)):
+        if name == 'plus' or name == '+':
+            vec = (1/np.sqrt(2), 1/np.sqrt(2))
+        if name == 'minus' or name == '-':
+            vec = (1 / np.sqrt(2), -1 / np.sqrt(2))
         self.alpha = vec[0]
         self.beta = vec[1]
 
