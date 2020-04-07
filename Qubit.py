@@ -61,6 +61,17 @@ class Qubit(np.ndarray):
     def __mul__(self, matrix):
         return np.matmul(self, matrix)
 
+    def __repr__(self):
+        nonzero = []
+        if self.alpha != 0: nonzero.append(self.alpha)
+        if self.beta != 0: nonzero.append(self.beta)
+        ret = ""
+        for i in range(len(nonzero)):
+            ret += '(' + str(nonzero[i]) + ')' + '|' + str(i) + '>'
+            if i != len(nonzero) - 1:
+                ret += ' + '
+        return ret
+
     def measure(self):
         x = np.random.random()
         if self.alpha <= x:
