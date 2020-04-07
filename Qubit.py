@@ -23,12 +23,12 @@ def _make_qubit(alpha, beta):
 
 
 # Constructs a quantum register using a numpy array of QUBIT objects
-def _make_register(size, amplitudes):
+def _make_register(amplitudes):
     """
-    :param size: the length of the register
     :param amplitudes:  numpy array of tuples corresponding to the amplitudes of each qubit in the register
     :return register: numpy array of qubits
     """
+    size = len(amplitudes)
     q = np.array(amplitudes[0]).view(Qubit)
     for i in range(size - 1):
         q = np.kron(q, np.array(amplitudes[i + 1]).view(Qubit))
@@ -46,15 +46,13 @@ class Qubit(np.ndarray):
 
     def __new__(cls, name=None, vec=(1, 0), shape=2):
         """
-        :param vec: a tuple of ALPHA and BETA, the amplitudes of states |0> and |1>, respectively (default |0>)
+        :param vec: a tuple of ALPHA and BETA, the amplitudes of states |0> and |1>, respectively
         :param shape: ensures the qubit is a 2D vector (i.e. sets the size of the numpy array to 2x1)
         :return: a quantum state with amplitudes ALPHA and BETA
         """
         valid_names = ['+', '-', 'plus', 'minus']
-        if name == 'plus' or name == '+':
-            return _make_qubit(1/np.sqrt(2), 1/np.sqrt(2))
-        if name == 'minus' or name == '-':
-            return _make_qubit(1/np.sqrt(2), -1/np.sqrt(2))
+        if name == 'plus' or name == '+': return _make_qubit(1/np.sqrt(2), 1/np.sqrt(2))
+        if name == 'minus' or name == '-': return _make_qubit(1/np.sqrt(2), -1/np.sqrt(2))
         alpha = vec[0]
         beta = vec[1]
         return _make_qubit(alpha, beta)
@@ -96,7 +94,7 @@ class Register(np.ndarray):
         bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
         if name in bell_state_names:
             return Register._make_bell_state(name)
-        return _make_register(size, [(1, 0)] * size)
+        return _make_register([(1, 0)] * size)
 
     def __init__(self, size=2):
         self.n = size
@@ -136,22 +134,22 @@ class Register(np.ndarray):
 
     @classmethod
     def zeros(cls, n):
-        return _make_register(n, [(1, 0)] * n)
+        return _make_register([(1, 0)] * n)
 
     @classmethod
     def ones(cls, n):
-        return _make_register(n, [(0, 1)] * n)
+        return _make_register([(0, 1)] * n)
 
     @classmethod
     def _make_bell_state(cls, name):
         if name == 'phi_plus':
-            x = _make_register(2, [(1, 0), (1, 0)])
+            x = _make_register([(1, 0), (1, 0)])
         elif name == 'phi_minus':
-            x = _make_register(2, [(0, 1), (1, 0)])
+            x = _make_register([(0, 1), (1, 0)])
         elif name == 'psi_plus':
-            x = _make_register(2, [(1, 0), (0, 1)])
+            x = _make_register([(1, 0), (0, 1)])
         elif name == 'psi_minus':
-            x = _make_register(2, [(0, 1), (0, 1)])
+            x = _make_register([(0, 1), (0, 1)])
         else:
             raise NameError('Name {} '.format(name) + 'is not recognized.')
         H_I = np.kron(H, np.identity(2))
