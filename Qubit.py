@@ -170,7 +170,7 @@ class Register(np.ndarray):
     # Performs Walsh-Hadamard on the register
     def walsh(self):
         vec = self.reshape(2 ** self.n)
-        w = np.array([[1, 1], [1, -1]]) * 1/np.sqrt(2)
+        w = H
         for i in range(self.n - 1):
             w = np.kron(w, H)
         return np.matmul(w, vec)
