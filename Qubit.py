@@ -90,13 +90,13 @@ class Register(np.ndarray):
 
     # Returns the |00> state if no parameters are passed.
     # If just SIZE is given, the register returned is the n-length |000...0>
-    def __new__(cls, name=None, size=2):
+    def __new__(cls, size, name=None):
         bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
         if name in bell_state_names:
             return Register._make_bell_state(name)
         return _make_register([(1, 0)] * size)
 
-    def __init__(self, size=2):
+    def __init__(self, size):
         self.n = size
 
     def as_vec(self):
@@ -170,7 +170,7 @@ class Register(np.ndarray):
     # Performs Walsh-Hadamard on the register
     def walsh(self):
         vec = self.reshape(2 ** self.n)
-        w = np.array([[1, 1], [1, -1]])
+        w = np.array([[1, 1], [1, -1]]) * 1/np.sqrt(2)
         for i in range(self.n - 1):
             w = np.kron(w, H)
-        return (1 / np.sqrt(2) ** self.n) * np.matmul(w, vec)
+        return np.matmul(w, vec)
