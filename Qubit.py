@@ -35,8 +35,24 @@ def _make_register(amplitudes):
     return q.view(Register)
 
 
+def binaryToDecimal(binary):
+    decimal, i, n = 0, 0, 0
+    while binary != 0:
+        dec = binary % 10
+        decimal = decimal + dec * pow(2, i)
+        binary = binary // 10
+        i += 1
+    return decimal
+
+
+def modifyBit(n, p, b):
+    mask = 1 << p
+    return (n & ~mask) | ((b << p) & mask)
+
+
 def dec_to_bin(x):
     return int(bin(x)[2:])
+
 
 bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
 
@@ -92,21 +108,27 @@ class Register(np.ndarray):
 
     # Returns the |00> state if no parameters are passed.
     # If just SIZE is given, the register returned is the n-length |000...0>
-    def __new__(cls, size=None, name=None):
+    def __new__(cls, n=None, name=None, amplitudes=None):
         if name in bell_state_names:
             return Register._make_bell_state(name)
-        return _make_register([(1, 0)] * size)
+        if amplitudes is not None:
+            if type(amplitudes) is not tuple:
+                raise TypeError('Amplitudes must be a tuple of values.')
+            return _make_register(amplitudes)
+        if name is None:
+            return _make_register([(1, 0)] * n)
 
-    def __init__(self, size=None, name=None):
+    def __init__(self, n=None, name=None, amplitudes=None):
         if name in bell_state_names:
+            self.name = name
             self.n = 2
-        elif size is None:
-            raise ValueError('Please enter either a NAME xor a SIZE')
-        else:
-            self.n = size
+        elif amplitudes is not None:
+            self.name = None
+            self.n = n
+            self.amplitudes = tuple([i for i in amplitudes])
 
     def as_vec(self):
-        return np.asarray(self).view(Register)
+        return np.asarray(self)
 
     # Changes the representation of the Register to KET sum formalism
     # (e.g. (a_1)|000...> + (a_2)|00...01> + ... + (a_2^n)|111...1> )
@@ -124,27 +146,29 @@ class Register(np.ndarray):
                 ret += ' + '
         return ret
 
-    # controls on the first (leftmost) qubit by default
-    def CNOT(self, control=0):
-        if control == 1:
-            CNOT = np.array([[1, 0, 0, 0],
-                             [0, 0, 0, 1],
-                             [0, 0, 1, 0],
-                             [0, 1, 0, 0]])
-        else:
-            CNOT = np.array([[1, 0, 0, 0],
-                             [0, 1, 0, 0],
-                             [0, 0, 0, 1],
-                             [0, 0, 1, 0]])
-        return np.matmul(CNOT, self)
-
-    @classmethod
-    def zeros(cls, n):
-        return _make_register([(1, 0)] * n)
-
-    @classmethod
-    def ones(cls, n):
-        return _make_register([(0, 1)] * n)
+    # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
+    def CNOT(self, control=1, target=0):
+        # modifyBit method does the modification in the reverse order, so we reverse the order of the bitstring
+        # inside the method to compensate.
+        N = int(np.log2(self.size))
+        v = self.as_vec()
+        skip = []
+        for i in range(2 ** N):
+            if i in skip:
+                continue
+            bitstring = str(dec_to_bin(i)).zfill(N)[::-1]
+            if bitstring[control] == '1':
+                if bitstring[target] == '0':
+                    switched = str(dec_to_bin(modifyBit(i, target, 1)))[::-1]
+                    switched = binaryToDecimal(int(switched))
+                else:
+                    switched = str(dec_to_bin(modifyBit(i, target, 0)))[::-1]
+                    switched = binaryToDecimal(int(switched))
+                skip.append(switched)
+                temp = v[i]
+                v[i] = v[switched]
+                v[switched] = temp
+        return v.view(Register)
 
     @classmethod
     def _make_bell_state(cls, name):
@@ -160,8 +184,16 @@ class Register(np.ndarray):
             raise NameError('Name {} '.format(name) + 'is not recognized.')
         H_I = np.kron(H, np.identity(2))
         x = np.matmul(H_I, x)
-        x = x.CNOT()
-        return x
+        register = x.CNOT().view(Register)
+        return register
+
+    @classmethod
+    def zeros(cls, n):
+        return _make_register([(1, 0)] * n)
+
+    @classmethod
+    def ones(cls, n):
+        return _make_register([(0, 1)] * n)
 
     @classmethod
     def as_register(cls, x):
