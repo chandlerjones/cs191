@@ -32,7 +32,6 @@ def _make_register(amplitudes):
     q = np.array(amplitudes[0]).view(Qubit)
     for i in range(size - 1):
         q = np.kron(q, np.array(amplitudes[i + 1]).view(Qubit))
-    q.reshape((4, 1))
     return q.view(Register)
 
 
@@ -123,9 +122,11 @@ class Register(np.ndarray):
         if qubits is not None:
             return _make_register(qubits)
         if amplitudes is not None:
-            x = np.log2(len(amplitudes))
+            L = np.array(amplitudes)
+            x = np.log2(L.size)
             assert x // 1 == x, 'The size of the register should be a power of 2.'
-            return np.asarray(amplitudes).reshape(4, 1).view(Register)
+            assert np.linalg.norm(L) - 1 < 1e-9, 'The sum of the squared amplitudes should be 1'
+            return np.asarray(amplitudes).view(Register)
         if name is None:
             return _make_register([(1, 0)] * n)
 
@@ -134,12 +135,14 @@ class Register(np.ndarray):
         self.n = n
         self.amplitudes = amplitudes
         self.qubits = qubits
-        self.ket = True
+        self.ket = ket
         if name in bell_state_names:
             self.name = name
             self.n = 2
+            self = Register._make_bell_state(name)
         if amplitudes is not None:
-            self.n = len(amplitudes)
+            L = np.array(amplitudes)
+            self.n = int(np.log2(L.size))
         if qubits is not None:
             self.n = len(qubits)
         if not self.ket:
@@ -151,8 +154,8 @@ class Register(np.ndarray):
             raise TypeError('Multiplication of two kets is not defined')
         if not other.ket and not self.ket:
             raise TypeError('Multiplication of two bras is not defined')
-        s = self.reshape((1, 4))
-        o = other.reshape((1, 4))
+        s = self.reshape((1, (2 ** self.n)))
+        o = other.reshape((1, (2 ** other.n)))
         if self.ket:
             prod = s.T @ o
         else:
@@ -220,7 +223,7 @@ class Register(np.ndarray):
                 temp = v[i]
                 v[i] = v[switched]
                 v[switched] = temp
-        return v.view(Register)
+        return Register(amplitudes=v)
 
     @classmethod
     def _make_bell_state(cls, name):
@@ -263,7 +266,7 @@ class Register(np.ndarray):
         w = H
         for i in range(self.n - 1):
             w = np.kron(w, H)
-        return np.matmul(w, vec)
+        return Register(amplitudes=np.matmul(w, vec))
 
     def QFT(self):
         const = 1 / np.sqrt((2 ** self.n))
