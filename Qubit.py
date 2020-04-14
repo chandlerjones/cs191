@@ -32,6 +32,7 @@ def _make_register(amplitudes):
     q = np.array(amplitudes[0]).view(Qubit)
     for i in range(size - 1):
         q = np.kron(q, np.array(amplitudes[i + 1]).view(Qubit))
+    q.reshape((4, 1))
     return q.view(Register)
 
 
@@ -106,9 +107,17 @@ class Qubit(np.ndarray):
 
 class Register(np.ndarray):
 
-    # Returns the |00> state if no parameters are passed.
-    # If just SIZE is given, the register returned is the n-length |000...0>
-    def __new__(cls, n=None, name=None, qubits=None, amplitudes=None):
+    def __new__(cls, n=None, name=None, qubits=None, amplitudes=None, bra=False):
+        """
+        :param n: (OPTIONAL) Returns an n-qubit register initialized to |000...0>
+        :param name: (OPTIONAL) Passing in the name of a bell state gives that bell state. More names to come.
+        :param qubits: (OPTIONAL) Returns the register formed by taking the tensor product of all of the QUBIT
+                       objects passed through in the order they were given
+        :param amplitudes: (OPTIONAL) Returns a register with the amplitudes given. Length of AMPLITUDES must be
+                           a power of two (raises ASSERTION ERROR) and its l2 norm must be equal to 1 (raises
+                           VALUE ERROR)
+        :return: a new Register object
+        """
         if name in bell_state_names:
             return Register._make_bell_state(name)
         if qubits is not None:
@@ -116,15 +125,16 @@ class Register(np.ndarray):
         if amplitudes is not None:
             x = np.log2(len(amplitudes))
             assert x // 1 == x, 'The size of the register should be a power of 2.'
-            return np.asarray(amplitudes).view(Register)
+            return np.asarray(amplitudes).reshape(4, 1).view(Register)
         if name is None:
             return _make_register([(1, 0)] * n)
 
-    def __init__(self, n=None, name=None, qubits=None, amplitudes=None):
+    def __init__(self, n=None, name=None, qubits=None, amplitudes=None, ket=True):
         self.name = name
         self.n = n
         self.amplitudes = amplitudes
         self.qubits = qubits
+        self.ket = True
         if name in bell_state_names:
             self.name = name
             self.n = 2
@@ -132,10 +142,35 @@ class Register(np.ndarray):
             self.n = len(amplitudes)
         if qubits is not None:
             self.n = len(qubits)
+        if not self.ket:
+            for i in range(self.n):
+                self[i] = np.conj(i)
 
+    def __mul__(self, other):
+        if other.ket and self.ket:
+            raise TypeError('Multiplication of two kets is not defined')
+        if not other.ket and not self.ket:
+            raise TypeError('Multiplication of two bras is not defined')
+        s = self.reshape((1, 4))
+        o = other.reshape((1, 4))
+        if self.ket:
+            prod = s.T @ o
+        else:
+            prod = s @ o.T
+        if prod.size == 1:
+            return int(prod)
+        else:
+            return prod.view(np.ndarray)
 
+    # Use to view the vector form of the register rather than the Bra-ket form
     def as_vec(self):
         return np.asarray(self)
+
+    def bra(self):
+        self.ket = False
+        for i in range(len(self)):
+            self[i] = np.conj(self[i])
+        return self
 
     # Changes the representation of the Register to KET sum formalism
     # (e.g. (a_1)|000...> + (a_2)|00...01> + ... + (a_2^n)|111...1> )
@@ -147,10 +182,16 @@ class Register(np.ndarray):
                 nonzero_indices.append(i)
         bins = [dec_to_bin(i) for i in nonzero_indices]
         ret = ""
-        for i in range(len(bins)):
-            ret += ('(' + str(self[nonzero_indices[i]]) + ')' + '|' + str(bins[i]).zfill(N) + '>')
-            if i != len(bins) - 1:
-                ret += ' + '
+        if self.ket:
+            for i in range(len(bins)):
+                ret += ('(' + str(self[nonzero_indices[i]]) + ')' + '|' + str(bins[i]).zfill(N) + '>')
+                if i != len(bins) - 1:
+                    ret += ' + '
+        else:
+            for i in range(len(bins)):
+                ret += ('(' + str(self[nonzero_indices[i]]) + ')' + '<' + str(bins[i]).zfill(N) + '|')
+                if i != len(bins) - 1:
+                    ret += ' + '
         return ret
 
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
