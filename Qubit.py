@@ -38,6 +38,8 @@ def _make_register(amplitudes):
 def dec_to_bin(x):
     return int(bin(x)[2:])
 
+bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
+
 
 # Qubit() with no arguments gives the |0> state by default
 # We assume use of the computational basis by default
@@ -51,15 +53,15 @@ class Qubit(np.ndarray):
         :return: a quantum state with amplitudes ALPHA and BETA
         """
         valid_names = ['+', '-', 'plus', 'minus']
-        if name == 'plus' or name == '+': return _make_qubit(1/np.sqrt(2), 1/np.sqrt(2))
-        if name == 'minus' or name == '-': return _make_qubit(1/np.sqrt(2), -1/np.sqrt(2))
+        if name == 'plus' or name == '+': return _make_qubit(1 / np.sqrt(2), 1 / np.sqrt(2))
+        if name == 'minus' or name == '-': return _make_qubit(1 / np.sqrt(2), -1 / np.sqrt(2))
         alpha = vec[0]
         beta = vec[1]
         return _make_qubit(alpha, beta)
 
     def __init__(self, name, vec=(1, 0)):
         if name == 'plus' or name == '+':
-            vec = (1/np.sqrt(2), 1/np.sqrt(2))
+            vec = (1 / np.sqrt(2), 1 / np.sqrt(2))
         if name == 'minus' or name == '-':
             vec = (1 / np.sqrt(2), -1 / np.sqrt(2))
         self.alpha = vec[0]
@@ -90,14 +92,18 @@ class Register(np.ndarray):
 
     # Returns the |00> state if no parameters are passed.
     # If just SIZE is given, the register returned is the n-length |000...0>
-    def __new__(cls, size, name=None):
-        bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
+    def __new__(cls, size=None, name=None):
         if name in bell_state_names:
             return Register._make_bell_state(name)
         return _make_register([(1, 0)] * size)
 
-    def __init__(self, size):
-        self.n = size
+    def __init__(self, size=None, name=None):
+        if name in bell_state_names:
+            self.n = 2
+        elif size is None:
+            raise ValueError('Please enter either a NAME xor a SIZE')
+        else:
+            self.n = size
 
     def as_vec(self):
         return np.asarray(self).view(Register)
@@ -154,7 +160,7 @@ class Register(np.ndarray):
             raise NameError('Name {} '.format(name) + 'is not recognized.')
         H_I = np.kron(H, np.identity(2))
         x = np.matmul(H_I, x)
-        x = np.matmul(x.CNOT())
+        x = x.CNOT()
         return x
 
     @classmethod
@@ -174,3 +180,15 @@ class Register(np.ndarray):
         for i in range(self.n - 1):
             w = np.kron(w, H)
         return np.matmul(w, vec)
+
+    def QFT(self):
+        const = 1 / np.sqrt((2 ** self.n))
+        amps = []
+        for k in range(2 ** self.n):
+            total = 0
+            for p in range(2 ** self.n):
+                total += self[p] * np.exp((2 * np.pi * 1j * p * k) / (2 ** self.n))
+            amps.append(total)
+        amps = np.asarray(amps)
+        amps *= const
+        return amps.view(Register)
