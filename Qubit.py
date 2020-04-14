@@ -108,24 +108,31 @@ class Register(np.ndarray):
 
     # Returns the |00> state if no parameters are passed.
     # If just SIZE is given, the register returned is the n-length |000...0>
-    def __new__(cls, n=None, name=None, amplitudes=None):
+    def __new__(cls, n=None, name=None, qubits=None, amplitudes=None):
         if name in bell_state_names:
             return Register._make_bell_state(name)
+        if qubits is not None:
+            return _make_register(qubits)
         if amplitudes is not None:
-            if type(amplitudes) is not tuple:
-                raise TypeError('Amplitudes must be a tuple of values.')
-            return _make_register(amplitudes)
+            x = np.log2(len(amplitudes))
+            assert x // 1 == x, 'The size of the register should be a power of 2.'
+            return np.asarray(amplitudes).view(Register)
         if name is None:
             return _make_register([(1, 0)] * n)
 
-    def __init__(self, n=None, name=None, amplitudes=None):
+    def __init__(self, n=None, name=None, qubits=None, amplitudes=None):
+        self.name = name
+        self.n = n
+        self.amplitudes = amplitudes
+        self.qubits = qubits
         if name in bell_state_names:
             self.name = name
             self.n = 2
-        elif amplitudes is not None:
-            self.name = None
-            self.n = n
-            self.amplitudes = tuple([i for i in amplitudes])
+        if amplitudes is not None:
+            self.n = len(amplitudes)
+        if qubits is not None:
+            self.n = len(qubits)
+
 
     def as_vec(self):
         return np.asarray(self)
@@ -148,22 +155,26 @@ class Register(np.ndarray):
 
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
     def CNOT(self, control=1, target=0):
-        # modifyBit method does the modification in the reverse order, so we reverse the order of the bitstring
-        # inside the method to compensate.
+        # modifyBit method does the modification in the reverse order, so we reverse the order of the bitstring,
+        # as well as the control and target, inside the method to compensate. Don't think too much about it.
+        # I know it's not elegant; go away. It works. Can't that be enough?
+        c = target
+        t = control
         N = int(np.log2(self.size))
         v = self.as_vec()
         skip = []
         for i in range(2 ** N):
             if i in skip:
                 continue
-            bitstring = str(dec_to_bin(i)).zfill(N)[::-1]
-            if bitstring[control] == '1':
-                if bitstring[target] == '0':
-                    switched = str(dec_to_bin(modifyBit(i, target, 1)))[::-1]
-                    switched = binaryToDecimal(int(switched))
+            bitstring = str(dec_to_bin(i)).zfill(N)
+            k = binaryToDecimal(int(bitstring[::-1]))
+            if bitstring[c] == '1':
+                if bitstring[t] == '0':
+                    switched = str(dec_to_bin(modifyBit(k, t, 1))).zfill(N)
+                    switched = binaryToDecimal(int(switched[::-1]))
                 else:
-                    switched = str(dec_to_bin(modifyBit(i, target, 0)))[::-1]
-                    switched = binaryToDecimal(int(switched))
+                    switched = str(dec_to_bin(modifyBit(k, t, 0))).zfill(N)
+                    switched = binaryToDecimal(int(switched[::-1]))
                 skip.append(switched)
                 temp = v[i]
                 v[i] = v[switched]
