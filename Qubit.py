@@ -256,9 +256,9 @@ class Register(np.ndarray):
             raise TypeError('Cannot convert {}'.format(type(x)) + 'to Register.'
                                                                   ' Data type must be Python list or numpy ndarray.')
         x = np.asarray(x)
-        if np.linalg.norm(x) != 1:
+        if np.linalg.norm(x) - 1 >= 1e-9:
             raise ValueError('Cannot convert to Register. Squared amplitudes must sum to 1.')
-        return x.view(Register)
+        return Register(amplitudes=x)
 
     # Performs Walsh-Hadamard on the register
     def walsh(self):
@@ -278,4 +278,4 @@ class Register(np.ndarray):
             amps.append(total)
         amps = np.asarray(amps)
         amps *= const
-        return amps.view(Register)
+        return Register(amplitudes=amps)
