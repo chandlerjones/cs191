@@ -32,7 +32,7 @@ def _make_register(amplitudes):
     q = np.array(amplitudes[0]).view(Qubit)
     for i in range(size - 1):
         q = np.kron(q, np.array(amplitudes[i + 1]).view(Qubit))
-    return q.view(Register)
+    return Register(amplitudes=q)
 
 
 def binaryToDecimal(binary):
@@ -56,7 +56,6 @@ bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
 
 # Qubit() with no arguments gives the |0> state by default
 # We assume use of the computational basis by default
-# NOTE: Qubits will be ROW VECTORS
 class Qubit(np.ndarray):
 
     def __new__(cls, name=None, vec=(1, 0)):
@@ -106,9 +105,9 @@ class Qubit(np.ndarray):
 
 class Register(np.ndarray):
 
-    def __new__(cls, n=None, name=None, qubits=None, amplitudes=None, bra=False):
+    def __new__(cls, n=2, name=None, qubits=None, amplitudes=None, bra=False):
         """
-        :param n: (OPTIONAL) Returns an n-qubit register initialized to |000...0>
+        :param n: (OPTIONAL) 2 by default. Returns an n-qubit register initialized to |000...0>
         :param name: (OPTIONAL) Passing in the name of a bell state gives that bell state. More names to come.
         :param qubits: (OPTIONAL) Returns the register formed by taking the tensor product of all of the QUBIT
                        objects passed through in the order they were given
@@ -130,7 +129,7 @@ class Register(np.ndarray):
         if name is None:
             return _make_register([(1, 0)] * n)
 
-    def __init__(self, n=None, name=None, qubits=None, amplitudes=None, ket=True):
+    def __init__(self, n=2, name=None, qubits=None, amplitudes=None, ket=True):
         self.name = name
         self.n = n
         self.amplitudes = amplitudes
