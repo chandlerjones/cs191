@@ -193,7 +193,6 @@ class Register(np.ndarray):
         return ret
 
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
-    # TODO: Fix CNOT generalization. Having arbitrary control/target bits seems to not work.
     def CNOT(self, control=0, target=1):
         N = int(np.log2(self.size))
         v = self.as_vec()
