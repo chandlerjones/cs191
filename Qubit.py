@@ -51,13 +51,15 @@ def dec_to_bin(x):
 
 bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
 
+################################################################################
+
 
 # Qubit() with no arguments gives the |0> state by default
 # We assume use of the computational basis by default
 # NOTE: Qubits will be ROW VECTORS
 class Qubit(np.ndarray):
 
-    def __new__(cls, name=None, vec=(1, 0), shape=2):
+    def __new__(cls, name=None, vec=(1, 0)):
         """
         :param vec: a tuple of ALPHA and BETA, the amplitudes of states |0> and |1>, respectively
         :param shape: ensures the qubit is a 2D vector (i.e. sets the size of the numpy array to 2x1)
@@ -79,7 +81,10 @@ class Qubit(np.ndarray):
         self.beta = vec[1]
 
     def __mul__(self, matrix):
-        return np.matmul(self, matrix)
+        x = np.matmul(self, matrix)[0]
+        a = x[0]
+        b = x[1]
+        return Qubit(vec=(a, b))
 
     def __repr__(self):
         nonzero = []
@@ -141,9 +146,11 @@ class Register(np.ndarray):
         if qubits is not None:
             self.n = len(qubits)
         if not self.ket:
-            for i in range(self.n):
-                self[i] = np.conj(i)
+            self.bra()
 
+    # Define multiplication of states
+    # <x|y> is valid, |x><y| is valid, but multiplication of kets/bras is not, and scaling kets/bras is not
+    # because the norm of the state must be equal to 1.
     def __mul__(self, other):
         if other.ket and self.ket:
             raise TypeError('Multiplication of two kets is not defined')
@@ -164,6 +171,7 @@ class Register(np.ndarray):
     def as_vec(self):
         return np.asarray(self)
 
+    # Conjugate transpose. |x> --> <x|
     def bra(self):
         self.ket = False
         for i in range(len(self)):
@@ -230,14 +238,17 @@ class Register(np.ndarray):
         register = Register(amplitudes=x.CNOT())
         return register
 
+    # Returns |000...0> of length n
     @classmethod
     def zeros(cls, n):
         return _make_register([(1, 0)] * n)
 
+    # Returns |111...1> of length n
     @classmethod
     def ones(cls, n):
         return _make_register([(0, 1)] * n)
 
+    # Converts a numpy array or a python list to a REGISTER object
     @classmethod
     def as_register(cls, x):
         if type(x) is not np.ndarray and type(x) is not list:
@@ -256,6 +267,7 @@ class Register(np.ndarray):
             w = np.kron(w, H)
         return Register(amplitudes=np.matmul(w, vec))
 
+    # Quantum Fourier Transform operation
     def QFT(self):
         const = 1 / np.sqrt((2 ** self.n))
         amps = []
