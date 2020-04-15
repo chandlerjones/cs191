@@ -195,11 +195,6 @@ class Register(np.ndarray):
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
     # TODO: Fix CNOT generalization. Having arbitrary control/target bits seems to not work.
     def CNOT(self, control=0, target=1):
-        # modifyBit method does the modification in the reverse order, so we reverse the order of the bitstring,
-        # as well as the control and target, inside the method to compensate. Don't think too much about it.
-        # I know it's not elegant; go away. It works. Can't that be enough?
-        c = target
-        t = control
         N = int(np.log2(self.size))
         v = self.as_vec()
         skip = []
