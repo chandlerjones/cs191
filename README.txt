@@ -2,22 +2,36 @@
 Quantum Circuit Simulation with Realistic Noise
 
 ### Documentation ###
-Utilities
+
+### Utilities ###
+
 -Pauli Matrices: X, Y, Z
+
 -Hadamard Matrix: H
+
 -binaryToDecimal(x): takes a binary string (x) and converts it to an integer
+
 -dec_to_bin(x): takes an integer (x) and converts it to a binary string
 
-Qubit Class
+
+### Qubit Class ###
+
 -initialization: 
+
       inputs: name=None (currently only 'plus', 'minus', '+', '-')
+      
               vec=(1, 0) (input the amplitudes directly)
+              
       outputs: Qubit object
+      
 -__mul__: defaults to np.matmul
+
 -measure: returns one of the basis vectors with probability = square of amplitudes
 
-Register Class
+### Register Class ###
+
 -initialization:
+
       inputs: n=None (initializes a length-n |000...0> register)
               name=None (currently just the bell states)
               qubits=None (a list of tuples corresponding to the constituent QUBITS in the register. Returns the 
@@ -26,14 +40,21 @@ Register Class
                                REGISTER object)
               bra=False (conjugate transpose of the input)
       output: Register object
+      
 -self.__mul__(other): inner product for bra/ket multiplication, outer product for ket/bra multipication
+
 -self.as_vec(): displays the numpy array (vector) representation of the register
+
 -self.bra(): conjugate transpose
+
 -self.CNOT(control=0, target=1): inputs are indices of control/target qubits in set 0,...,N.  returns the output of the CNOT operation
+
 -self.walsh(): performs a Walsh-Hadamard transformation on the qubit
+
 -self.QFT(): performs a quantum fourier transform on the qubit
 
-Examples:
+
+### Examples: ###
 
 ########## WALSH-HADAMARD AND STATE MULTIPLICATION ##########
 >>> x = Register(n=2)                         # Create two registers, both initialized to the state |00>
