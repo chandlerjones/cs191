@@ -45,11 +45,6 @@ def binaryToDecimal(binary):
     return decimal
 
 
-def modifyBit(n, p, b):
-    mask = 1 << p
-    return (n & ~mask) | ((b << p) & mask)
-
-
 def dec_to_bin(x):
     return int(bin(x)[2:])
 
@@ -198,7 +193,8 @@ class Register(np.ndarray):
         return ret
 
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
-    def CNOT(self, control=1, target=0):
+    # TODO: Fix CNOT generalization. Having arbitrary control/target bits seems to not work.
+    def CNOT(self, control=0, target=1):
         # modifyBit method does the modification in the reverse order, so we reverse the order of the bitstring,
         # as well as the control and target, inside the method to compensate. Don't think too much about it.
         # I know it's not elegant; go away. It works. Can't that be enough?
@@ -211,18 +207,16 @@ class Register(np.ndarray):
             if i in skip:
                 continue
             bitstring = str(dec_to_bin(i)).zfill(N)
-            k = binaryToDecimal(int(bitstring[::-1]))
-            if bitstring[c] == '1':
-                if bitstring[t] == '0':
-                    switched = str(dec_to_bin(modifyBit(k, t, 1))).zfill(N)
-                    switched = binaryToDecimal(int(switched[::-1]))
+            x = i
+            if bitstring[control] == '1':
+                if bitstring[target] == '0':
+                    x ^= 1 << N - target - 1
                 else:
-                    switched = str(dec_to_bin(modifyBit(k, t, 0))).zfill(N)
-                    switched = binaryToDecimal(int(switched[::-1]))
-                skip.append(switched)
+                    x ^= 0 << N - target - 1
+                index = binaryToDecimal(x)
                 temp = v[i]
-                v[i] = v[switched]
-                v[switched] = temp
+                v[i] = v[index]
+                v[index] = temp
         return Register(amplitudes=v)
 
     @classmethod
@@ -239,7 +233,7 @@ class Register(np.ndarray):
             raise NameError('Name {} '.format(name) + 'is not recognized.')
         H_I = np.kron(H, np.identity(2))
         x = np.matmul(H_I, x)
-        register = x.CNOT().view(Register)
+        register = Register(amplitudes=x.CNOT())
         return register
 
     @classmethod
