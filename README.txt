@@ -1,6 +1,10 @@
 # cs191
 Quantum Circuit Simulation with Realistic Noise
 
+# TODO: 1) Algorithm Implementation(s) (probably Shor's? maybe a second?)
+        2) Noise injection (See lecture 14 notes for possibilities)
+        3) Error suppression methods (See lecture 16 notes)
+
 ### Documentation ###
 
 Utilities
