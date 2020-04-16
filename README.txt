@@ -38,6 +38,8 @@ Register Class
 -self.CNOT(control=0, target=1): inputs are indices of control/target qubits in set 0,...,N.  returns the output of the CNOT operation
 -self.walsh(): performs a Walsh-Hadamard transformation on the qubit
 -self.QFT(): performs a quantum fourier transform on the qubit
+-self.purity: gives the purity of the state (1 for pure state, 0.5 for maximally mixed)
+-self.density: returns the density matrix of the state
 
 Examples:
 
