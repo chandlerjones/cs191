@@ -21,7 +21,8 @@ Moving toward origin of sphere. Equal probability p/3 of applying X, Y, or Z.
 Moving toward north pole `|0〉`. Also called Thermal relaxation. Probability of `|1〉 -> |0〉`
 
 ### Implementation Proposal ###
-Using qiskit as a ref, give each gate configurable noise and global default noise per op. Consider configurable dephasing of each inactive qubit with global default, as usual, time permitting.
+Using qiskit as a ref, give each gate configurable noise and global default noise per op. Consider configurable dephasing of
+each inactive qubit with global default, as usual, time permitting.
 
 ### Documentation ###
 
