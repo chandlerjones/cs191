@@ -52,6 +52,7 @@ def dec_to_bin(x):
 bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
 
 ################################################################################
+################################################################################
 
 
 # Qubit() with no arguments gives the |0> state by default
@@ -113,7 +114,7 @@ class Register(np.ndarray):
                        objects passed through in the order they were given
         :param amplitudes: (OPTIONAL) Returns a register with the amplitudes given. Length of AMPLITUDES must be
                            a power of two (raises ASSERTION ERROR) and its l2 norm must be equal to 1 (raises
-                           VALUE ERROR)
+                           ASSERTION ERROR)
         :return: a new Register object
         """
         if name in bell_state_names:
@@ -124,7 +125,7 @@ class Register(np.ndarray):
             L = np.array(amplitudes)
             x = np.log2(L.size)
             assert x // 1 == x, 'The size of the register should be a power of 2.'
-            assert np.linalg.norm(L) - 1 < 1e-9, 'The sum of the squared amplitudes should be 1'
+            # assert np.linalg.norm(L) - 1 < 1e-9, 'The sum of the squared amplitudes should be 1'
             return np.asarray(amplitudes).view(Register)
         if name is None:
             return _make_register([(1, 0)] * n)
@@ -138,14 +139,15 @@ class Register(np.ndarray):
         if name in bell_state_names:
             self.name = name
             self.n = 2
-            self = Register._make_bell_state(name)
         if amplitudes is not None:
             L = np.array(amplitudes)
             self.n = int(np.log2(L.size))
         if qubits is not None:
             self.n = len(qubits)
+
         if not self.ket:
             self.bra()
+        self.amplitudes = np.asarray([i for i in self])
 
     # Define multiplication of states
     # <x|y> is valid, |x><y| is valid, but multiplication of kets/bras is not, and scaling kets/bras is not
@@ -278,3 +280,20 @@ class Register(np.ndarray):
         amps = np.asarray(amps)
         amps *= const
         return Register(amplitudes=amps)
+
+    @property
+    def purity(self):
+        return np.trace(self.density @ self.density)
+
+    @property
+    def density(self):
+        N = 2 ** self.n
+        rho = np.zeros((N, N))
+        for i in range(N):
+            x = [0] * N
+            x[i] = self.amplitudes[i]
+            ket = Register(amplitudes=x)
+            bra = Register(amplitudes=x)
+            bra.bra()
+            rho += (ket * bra)
+        return rho
