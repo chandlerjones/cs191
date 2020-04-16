@@ -5,6 +5,23 @@ Quantum Circuit Simulation with Realistic Noise
         2) Noise injection (See lecture 14 notes for possibilities) -Wyatt, Bradley, Jack for three different types
         3) Error suppression methods (See lecture 16 notes) -Everyone, time permitting
         4) Comparison with Cirq -Chandler
+        
+### Types of Single Qubit Error ###
+Please verify but from what I understand:
+#### Dephasing ####
+Moving from surface of bloch sphere to the Z axis over time due to magnetic field. jump no-jump p probability of applying Z.
+
+#### Bit Flip ####
+Flip across Z plane. Probability of flipping from 1 to 0. Probability p of applying X.
+
+#### Depolarization ####
+Moving toward origin of sphere. Equal probability p/3 of applying X, Y, or Z.
+
+#### Amplitude Dampening ####
+Moving toward north pole `|0〉`. Also called Thermal relaxation. Probability of `|1〉 -> |0〉`
+
+### Implementation Proposal ###
+Using qiskit as a ref, give each gate configurable noise and global default noise per op. Consider configurable dephasing of each inactive qubit with global default, as usual, time permitting.
 
 ### Documentation ###
 
