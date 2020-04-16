@@ -22,7 +22,8 @@ Moving toward north pole `|0〉`. Also called Thermal relaxation. Probability of
 
 ### Implementation Proposal ###
 Using qiskit as a ref, give each gate configurable noise and global default noise per op. This might require an overarching
-Circuit class like qiskit or individual gate classes. Consider configurable dephasing of each inactive qubit over time with global default, as usual, time permitting.
+Circuit class like qiskit or individual gate classes. Consider configurable dephasing of each inactive qubit over time with
+global default, as usual, time permitting.
 
 ### Documentation ###
 
