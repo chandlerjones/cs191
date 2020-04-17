@@ -17,7 +17,7 @@ Flip across Z plane. Probability of flipping from 1 to 0. Probability p of apply
 #### Depolarization ####
 Moving toward origin of sphere. Equal probability p/3 of applying X, Y, or Z.
 
-#### Amplitude Dampening ####
+#### Amplitude Damping ####
 Moving toward north pole `|0〉`. Also called Thermal relaxation. Probability of `|1〉 -> |0〉`
 
 ### Implementation Proposal ###
