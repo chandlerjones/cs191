@@ -12,7 +12,7 @@ def append_last_p(p):
 # generated and need not be included.
 class Noise:
 
-    def __init__(self, n, probabilities, transforms):
+    def __init__(self, n, probabilities, transforms, hasI=False):
         """
         :n:             gate dimension
         :probabilities: k vector. k probabilities of each transform. sum(probabilities) < 1.0
@@ -20,7 +20,9 @@ class Noise:
 
         No verifications / validations done atm
         """
-        self.t = np.concatenate([transforms, [np.eye(2**n)]])
+        if not hasI:
+            transforms = np.concatenate([transforms, [np.eye(2**n)]])
+        self.t = transforms
         self.p = probabilities # not adding probability of I due to potential floating point issues
         self.k = len(self.p)
         self.n = n
@@ -35,7 +37,7 @@ class Noise:
         t = np.kron(self.t, other.t)
         p = np.kron(append_last_p(self.p), append_last_p(other.p))[:-1] # remove I probability because...
         n = self.n + other.n
-        return Noise(n, p, t)
+        return Noise(n, p, t, hasI=True)
 
 
     # Randomly chooses a noise transformation to be applied. Watch out for those nasty floating point errors!
@@ -61,10 +63,10 @@ class Gate:
 
         No verifications / validations done on transform(unitary) matrix atm
         """
-        if not noise:
+        if noise is None:
             noise = NoNoise(n)
-        if not transform:
-            transform = np.eye(n)
+        if transform is None:
+            transform = np.eye(2**n)
         self.u = transform
         self.noise = noise
         self.n = n
