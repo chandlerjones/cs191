@@ -11,8 +11,12 @@ assert len(c.noise.t) == 1 and c.noise.t.shape[1] == 32 and c.noise.t.shape[1] =
 r = Register(n=2)
 c = Gate(1,H) * Gate(1,H)
 r = c.apply(r)
-assert np.isclose(r.as_vec(),[0.5,0.5,0.5,0.5]).all()
+assert np.isclose(r.as_vec(),[0.5, 0.5, 0.5, 0.5]).all()
 
 
+r = Register(n=2)
+c = Gate(1, H) * Gate(1)
+r = c.apply(r)
+assert np.isclose(r.as_vec(),[2**-0.5, 0, 2**-0.5, 0]).all()
 
 print ("All is Good!")
