@@ -5,6 +5,25 @@ Quantum Circuit Simulation with Realistic Noise
         2) Noise injection (See lecture 14 notes for possibilities) -Wyatt, Bradley, Jack for three different types
         3) Error suppression methods (See lecture 16 notes) -Everyone, time permitting
         4) Comparison with Cirq -Chandler
+        
+### Types of Single Qubit Error ###
+Please verify but from what I understand:
+#### Dephasing ####
+Moving from surface of bloch sphere to the Z axis over time due to magnetic field. jump no-jump p probability of applying Z.
+
+#### Bit Flip ####
+Flip across Z plane. Probability of flipping from 1 to 0. Probability p of applying X.
+
+#### Depolarization ####
+Moving toward origin of sphere. Equal probability p/3 of applying X, Y, or Z.
+
+#### Amplitude Damping ####
+Moving toward north pole `|0〉`. Also called Thermal relaxation. Probability of `|1〉 -> |0〉`
+
+### Implementation Proposal ###
+Using qiskit as a ref, give each gate configurable noise and global default noise per op. This might require an overarching
+Circuit class like qiskit or individual gate classes. Consider configurable dephasing of each inactive qubit over time with
+global default, as usual, time permitting.
 
 ### Documentation ###
 
@@ -38,6 +57,8 @@ Register Class
 -self.CNOT(control=0, target=1): inputs are indices of control/target qubits in set 0,...,N.  returns the output of the CNOT operation
 -self.walsh(): performs a Walsh-Hadamard transformation on the qubit
 -self.QFT(): performs a quantum fourier transform on the qubit
+-self.purity: gives the purity of the state (1 for pure state, 0.5 for maximally mixed)
+-self.density: returns the density matrix of the state
 
 Examples:
 
