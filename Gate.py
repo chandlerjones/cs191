@@ -7,7 +7,6 @@ import numpy as np
 # default noise model TBD
 default_noise = None
 
-
 # countermeasure for forseeable floating point issues when doing tensor products.
 def append_last_p(p):
     return np.append(p, [1.0 - sum(p)])
@@ -52,7 +51,7 @@ class Noise:
 
 # Generic Gate class. by default it is Identity with default noise model
 class Gate:
-    def __init__(self, n, transform = np.eye(2), noise = default_noise):
+    def __init__(self, n, transform = np.eye(2), noise = None):
         """
         :n:          gate dimension
         :transform:  2^n x 2^n unitary matrix
@@ -73,7 +72,13 @@ class Gate:
             raise TypeError('Cannot multiply type Gate with ' + type(other).__name__)
 
         self.u = np.kron(self.u, other.u)
-        self.noise = self.noise * other.noise
+        if self.noise and other.noise:
+            self.noise *= other.noise
+        elif self.noise and other.noise:
+            pass
+        else:
+            self.noise = self.noise if self.noise else other.noise
+
         self.n += other.n
 
     # Apply the gate to a given register.
@@ -83,4 +88,7 @@ class Gate:
 
         :return: Register returned. Or maybe vector. Same thing....
         """
-        return self.noise.eval() * self.u * register.as_vec()
+        if self.noise:
+            return self.noise.eval() * self.u * register.as_vec()
+        else:
+            return self.u * register.as_vec()
