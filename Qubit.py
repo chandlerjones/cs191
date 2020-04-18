@@ -101,7 +101,7 @@ class Qubit(np.ndarray):
 
     def measure(self):
         x = np.random.random()
-        if self.alpha <= x:
+        if (self.alpha ** 2) <= x:
             return 0
         return 1
 
@@ -203,6 +203,20 @@ class Register(np.ndarray):
                     ret += ' + '
         return ret
 
+    def measure_all(self):
+        probs = np.array(self.amplitudes) ** 2
+        sample = np.random.random()
+        ranges = [0]
+        bound = 0
+        for i in range(2 ** self.n):
+            bound += probs[i]
+            ranges.append(bound)
+        for i in range((2 ** self.n) - 1):
+            print(sample)
+            if ranges[i] < sample <= ranges[i + 1]:
+                print(i + 1)
+                return binaryToDecimal(i + 1)
+
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
     def CNOT(self, control=0, target=1):
         N = int(np.log2(self.size))
@@ -299,11 +313,3 @@ class Register(np.ndarray):
             bra.bra()
             rho += (ket * bra)
         return rho
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
