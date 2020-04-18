@@ -1,6 +1,6 @@
 import numpy as np
 from Qubit import *
-from math import ceil, log
+from math import ceil, log, sqrt
 from collections import Counter
 
 
@@ -29,7 +29,7 @@ def main(N, attempts=1):
 	tally = Counter(vals)
 	amps = []
 	for i in range(2**n):
-		amps.append(tally.get(i, 0)/Q)
+		amps.append(sqrt(tally.get(i, 0)/Q))
 	target = Register(amplitudes=amps)
 
 

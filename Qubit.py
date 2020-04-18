@@ -181,6 +181,18 @@ class Register(np.ndarray):
             self[i] = np.conj(self[i])
         return self
 
+    #Measures register and returns one of the possible qubits
+    def measure(self):
+        print('hi')
+        probs = [x**2 for x in self.amplitudes]
+        rand = np.random.random()
+        cumul_prob = 0
+        for i in range(2**self.n):
+            cumul_prob += probs[i]
+            if rand < cumul_prob and probs[i]:
+                return i
+
+
     # Changes the representation of the Register to KET sum formalism
     # (e.g. (a_1)|000...> + (a_2)|00...01> + ... + (a_2^n)|111...1> )
     def __repr__(self):
