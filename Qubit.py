@@ -212,10 +212,9 @@ class Register(np.ndarray):
             bound += probs[i]
             ranges.append(bound)
         for i in range((2 ** self.n) - 1):
-            print(sample)
+            # print(sample)
             if ranges[i] < sample <= ranges[i + 1]:
-                print(i + 1)
-                return binaryToDecimal(i + 1)
+                return str(dec_to_bin(i + 1)).zfill(self.n)
 
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
     def CNOT(self, control=0, target=1):
