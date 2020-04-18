@@ -101,7 +101,7 @@ class Qubit(np.ndarray):
 
     def measure(self):
         x = np.random.random()
-        if self.alpha <= x:
+        if self.alpha**2 <= x:
             return 0
         return 1
 
