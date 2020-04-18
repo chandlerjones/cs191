@@ -183,7 +183,6 @@ class Register(np.ndarray):
 
     #Measures register and returns one of the possible qubits
     def measure(self):
-        print('hi')
         probs = [x**2 for x in self.amplitudes]
         rand = np.random.random()
         cumul_prob = 0
