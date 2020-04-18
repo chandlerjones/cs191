@@ -1,4 +1,5 @@
 import numpy as np
+import qiskit
 
 # Hadamard Gate
 H = (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]])
@@ -50,6 +51,7 @@ def dec_to_bin(x):
 
 
 bell_state_names = ['phi_plus', 'phi_minus', 'psi_plus', 'psi_minus']
+
 
 ################################################################################
 ################################################################################
@@ -164,7 +166,7 @@ class Register(np.ndarray):
         else:
             prod = s @ o.T
         if prod.size == 1:
-            return int(prod)
+            return float(prod)
         else:
             return prod.view(np.ndarray)
 
@@ -297,3 +299,11 @@ class Register(np.ndarray):
             bra.bra()
             rho += (ket * bra)
         return rho
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()
