@@ -90,6 +90,7 @@ class Gate:
         :return: Register returned. Or maybe vector. Same thing....
         """
         if self.noise:
-            return self.noise.eval() * self.u * register.as_vec()
+            vec = self.noise.eval() @ self.u @ register.as_vec()
         else:
-            return self.u * register.as_vec()
+            vec = self.u @ register.as_vec()
+        return Register(n=len(vec), amplitudes=vec)
