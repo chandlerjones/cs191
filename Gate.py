@@ -160,7 +160,7 @@ class ZNoise(Noise):
         super().__init__(n, pi[:-1], ti)
 
 
-# Pauli noise independently on n bits.
+# Depolarization / Pauli noise independently on n bits.
 class PauliNoise(Noise):
     def __init__(self, n, px, py, pz):
         if px < 0.0 or py < 0.0 or pz < 0.0 or px + py + pz > 1.0:
