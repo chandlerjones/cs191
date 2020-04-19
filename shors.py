@@ -13,7 +13,10 @@ def main(N, attempts=1):
 	# if N % 2 == 0:
 	# 	return 2
 
+
 	a = np.random.randint(1, N)
+	print("The random number chosen is {}".format(a))
+
 	# if euclid_alg(a, N) == 1:
 	# 	return a
 
@@ -31,6 +34,24 @@ def main(N, attempts=1):
 	for i in range(2**n):
 		amps.append(sqrt(tally.get(i, 0)/Q))
 	target = Register(amplitudes=amps)
+
+	r = target.measure()
+
+	amps = 2**n * [0]
+	amps[r] = 1
+
+	target = Register(amplitudes=amps)
+
+	amps = Q*[0]
+	for q in range(Q):
+		b = (a**q) % N
+		if b == r:
+			count += 1
+			amps[q] = 1
+	amps = [sqrt(1/count) * x for x in amps]
+	source = Register(amplitudes=amps)
+
+
 
 
 
