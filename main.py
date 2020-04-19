@@ -1,7 +1,11 @@
 import numpy
+from qiskit_shor import *
 # import shors
 from qiskit import QuantumCircuit, QuantumRegister
 from Qubit import *
+from qiskit import IBMQ
+from qiskit.aqua import QuantumInstance
+from qiskit.aqua.algorithms import Shor
 
 
 def main():
@@ -54,7 +58,7 @@ def main():
 
     print('############################################################################')
     print('############ Basic Functionality Tests Against Control (Qiskit) ############')
-    print("############################################################################")
+    print("############################################################################", '\n')
 
     qis_x = QuantumCircuit(2, 2)
     qis_x.h(0)
@@ -69,7 +73,10 @@ def main():
 
     print('###############################################################################################')
     print('############ Test of Noiseless Implementation of Quantum Factoring Against Control ############')
-    print('###############################################################################################')
+    print('###############################################################################################', '\n')
+
+    print('Qiskit implementation (N=21)')
+    run_shor()
 
 
 if __name__ == "__main__":
