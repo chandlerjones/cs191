@@ -217,6 +217,8 @@ class Register(np.ndarray):
             # print(sample)
             if ranges[i] < sample <= ranges[i + 1]:
                 return str(dec_to_bin(i + 1)).zfill(self.n)
+
+
     #measure function for shors; returns int
     def measure(self):
         probs = [abs(x)**2 for x in self.amplitudes]
