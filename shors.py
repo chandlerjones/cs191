@@ -56,7 +56,7 @@ def euclid_alg(a, b, x=1, y=1):
 	return gcd
 
 
-
+#Computes one iteration of Shor's Algorithm
 def shors_alg(N):
 
 	a = np.random.randint(1, N)
@@ -109,21 +109,55 @@ def shors_alg(N):
 	#Measurement used in finding the period
 	C = source.measure()
 
-	#Determining the period
-	ratio = C/Q
-	r = box_8_1(ratio, Q)
+	#Determining the period; based off of Box 8.1 in the text; classical
+	r = cont_fraction_expansion(C, Q, N)
 
-
-
-
+	#check to make sure we're in the good case: r even and a**(r/2) = -1 mod N
 	if not ((r % 2 == 0) and ((a**(r//2) % N) == N-1)):
 		print("The random number chosen was {} which resulted in a degenerate case\n".format(a))
 		return None
 
-
+	#Find a factor
+	y = a**(r//2)
+	guess = euclid_alg(N, y-1)
+	guess = guess if (guess != 1) else euclid_alg(N, y+1)
 
 	print("The random number chosen was {} which yielded the guess {}\n".format(a, guess))
 	return guess
+
+#Computes the period; see Box 8.1/pg 167 in the text
+def cont_fraction_expansion(C, Q, N):
+
+	#initalizing the first values
+	a_0 = int(C/Q)
+	eps_0 = C/Q - a_0
+	p_0 = a_0
+	q_0 = 1
+
+	a = int(1/(eps_0-1))
+	eps = 1/(eps_0)-a
+
+	p_1 = a*a_0 + 1
+	q_1 = a
+
+	if q_1 <= N:
+		return q_1
+
+	a = int(1/(eps))
+	eps = 1/eps-a
+	p = a*p_1 + p_0
+	q = a*q_1 + q_0
+	prev_q = q_1
+	prev_p = p_1
+
+	#iteration starts with current q_i = q_2; after first loop have q_3
+	while not (prev_q < q <= N):
+		a = int(1/(eps-1))
+		eps = 1/eps-a
+		p = a*p + prev_p
+		q = a*q + prev_q
+
+	return q
 
 
 
