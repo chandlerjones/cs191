@@ -1,5 +1,6 @@
 import numpy as np
-import qiskit
+import warnings
+warnings.filterwarnings('ignore')
 
 # Hadamard Gate
 H = (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]])
@@ -74,7 +75,7 @@ class Qubit(np.ndarray):
         beta = vec[1]
         return _make_qubit(alpha, beta)
 
-    def __init__(self, name, vec=(1, 0)):
+    def __init__(self, name=None, vec=(1, 0)):
         if name == 'plus' or name == '+':
             vec = (1 / np.sqrt(2), 1 / np.sqrt(2))
         if name == 'minus' or name == '-':
@@ -90,14 +91,31 @@ class Qubit(np.ndarray):
 
     def __repr__(self):
         nonzero = []
-        if self.alpha != 0: nonzero.append(self.alpha)
-        if self.beta != 0: nonzero.append(self.beta)
+        nonzero.append(self.alpha)
+        nonzero.append(self.beta)
         ret = ""
-        for i in range(len(nonzero)):
+        for i in range(2):
+            if nonzero[i] == 0:
+                continue
             ret += '(' + str(nonzero[i]) + ')' + '|' + str(i) + '>'
-            if i != len(nonzero) - 1:
+            if nonzero[1] != 0 and i != 1:
                 ret += ' + '
         return ret
+
+    def pauli(self, op):
+        if op == 'X':
+            p = np.matmul(self, X)
+        elif op == 'Y':
+            p = np.matmul(self, Y)
+        elif op == 'Z':
+            p = np.matmul(self, Z)
+        else:
+            raise ValueError('Argument must be either X, Y, or Z as string')
+        return Qubit(vec=(p[0], p[1]))
+
+    def Hadamard(self):
+        p = np.matmul(self, H)
+        return Qubit(vec=(p[0], p[1]))
 
     def measure(self):
         x = np.random.random()
@@ -279,7 +297,7 @@ class Register(np.ndarray):
         w = H
         for i in range(self.n - 1):
             w = np.kron(w, H)
-        return Register(amplitudes=np.around(np.matmul(w, vec), 9))
+        return Register(amplitudes=np.around(np.matmul(w, vec), 9), ket=self.ket)
 
     # Quantum Fourier Transform operation
     def QFT(self):
@@ -292,11 +310,11 @@ class Register(np.ndarray):
             amps.append(total)
         amps = np.asarray(amps)
         amps *= const
-        return Register(amplitudes=amps)
+        return Register(amplitudes=amps, ket=self.ket)
 
     @property
     def purity(self):
-        return np.trace(self.density @ self.density)
+        return np.real(np.trace(self.density @ self.density))
 
     @property
     def density(self):
@@ -310,3 +328,4 @@ class Register(np.ndarray):
             bra.bra()
             rho += (ket * bra)
         return rho
+
