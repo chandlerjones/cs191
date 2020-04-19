@@ -101,7 +101,7 @@ class Qubit(np.ndarray):
 
     def measure(self):
         x = np.random.random()
-        if (self.alpha ** 2) <= x:
+        if self.alpha**2 <= x:
             return 0
         return 1
 
@@ -180,6 +180,17 @@ class Register(np.ndarray):
         for i in range(len(self)):
             self[i] = np.conj(self[i])
         return self
+
+    #Measures register and returns one of the possible qubits
+    def measure(self):
+        probs = [x**2 for x in self.amplitudes]
+        rand = np.random.random()
+        cumul_prob = 0
+        for i in range(2**self.n):
+            cumul_prob += probs[i]
+            if rand < cumul_prob and probs[i]:
+                return i
+
 
     # Changes the representation of the Register to KET sum formalism
     # (e.g. (a_1)|000...> + (a_2)|00...01> + ... + (a_2^n)|111...1> )
