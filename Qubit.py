@@ -108,7 +108,7 @@ class Qubit(np.ndarray):
 
 class Register(np.ndarray):
 
-    def __new__(cls, n=2, name=None, qubits=None, amplitudes=None, bra=False):
+    def __new__(cls, n=2, name=None, qubits=None, amplitudes=None, ket=True):
         """
         :param n: (OPTIONAL) 2 by default. Returns an n-qubit register initialized to |000...0>
         :param name: (OPTIONAL) Passing in the name of a bell state gives that bell state. More names to come.
@@ -166,7 +166,8 @@ class Register(np.ndarray):
         else:
             prod = s @ o.T
         if prod.size == 1:
-            return float(prod)
+            p = prod.view(np.ndarray)
+            return p[0][0]
         else:
             return prod.view(np.ndarray)
 
@@ -176,11 +177,10 @@ class Register(np.ndarray):
 
     # Conjugate transpose. |x> --> <x|
     def bra(self):
-        self.ket = False
         for i in range(len(self)):
-            self[i] = np.conj(self[i])
+            self.amplitudes[i] = np.conj(self[i])
+        self.ket = False
         return self
-
 
     # Changes the representation of the Register to KET sum formalism
     # (e.g. (a_1)|000...> + (a_2)|00...01> + ... + (a_2^n)|111...1> )
