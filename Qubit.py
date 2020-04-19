@@ -204,33 +204,15 @@ class Register(np.ndarray):
                     ret += ' + '
         return ret
 
-    # Measures register and returns one of the possible qubits
-    def measure_all(self):
-        probs = np.array([abs(x) for x in self.amplitudes]) ** 2
-        sample = np.random.random()
-        ranges = [0]
-        bound = 0
-        for i in range(2 ** self.n):
-            bound += probs[i]
-            ranges.append(bound)
-        for i in range((2 ** self.n) - 1):
-            # print(sample)
-            if ranges[i] < sample <= ranges[i + 1]:
-                return str(dec_to_bin(i + 1)).zfill(self.n)
-
-
-    #measure function for shors; returns int
+    # measure function for shors; returns int
     def measure(self):
-        probs = [abs(x)**2 for x in self.amplitudes]
+        probs = [abs(x) ** 2 for x in self.amplitudes]
         sample = np.random.random()
         cumul_prob = 0
-        for i in range(2**self.n):
+        for i in range(2 ** self.n):
             cumul_prob += probs[i]
             if sample < cumul_prob and probs[i] != 0:
                 return i
-
-
-
 
     # controls on the first (leftmost) qubit and targets the second (second from left) qubit by default
     def CNOT(self, control=0, target=1):
