@@ -42,14 +42,18 @@ def main(N, attempts=1):
 
 	target = Register(amplitudes=amps)
 
+
+	total = 0
 	amps = Q*[0]
 	for q in range(Q):
 		b = (a**q) % N
 		if b == r:
-			count += 1
+			total += 1
 			amps[q] = 1
-	amps = [sqrt(1/count) * x for x in amps]
+	amps = [sqrt(1/total) * x for x in amps]
 	source = Register(amplitudes=amps)
+
+	source = source.QFT()
 
 
 
