@@ -127,6 +127,7 @@ Hadamard Class
 Walsh Class
 -description: Creates a walsh gate on n qubits with specified noise channel.
 
+-----------------------------------------------------------------------------------------------------------------
 
 Noise Class
 -description: represents a noise channel. Can be directly instantiated but it's best to inherit from this class
