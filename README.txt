@@ -27,6 +27,8 @@ global default, as usual, time permitting.
 
 ### Documentation ###
 
+########################### Qubit.py ##############################
+
 Utilities
 -Pauli Matrices: X, Y, Z
 -Hadamard Matrix: H
@@ -152,3 +154,5 @@ PauliNoise Class
 -description: Apply one of X, Y, Z with probabilities px, py, pz on each of n bits. See code for usage.
          
         
+Examples:
+See test.py for example usage.
