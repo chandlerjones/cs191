@@ -1,8 +1,10 @@
-############## VERY VERY UNTESTED REFERENCE CODE! RUN AT YOUR OWN RISK! #############################
-
-
 from Qubit import *
 import numpy as np
+import math 
+
+#########################################################################################
+############ Generic Classes and Functions ##############################################
+#########################################################################################
 
 # countermeasure for forseeable floating point issues when doing tensor products.
 def append_last_p(p):
@@ -12,7 +14,7 @@ def append_last_p(p):
 # generated and need not be included.
 class Noise:
 
-    def __init__(self, n, probabilities, transforms, hasI=False):
+    def __init__(self, n, probabilities, transforms):
         """
         :n:             gate dimension
         :probabilities: k vector. k probabilities of each transform. sum(probabilities) < 1.0
@@ -20,8 +22,11 @@ class Noise:
 
         No verifications / validations done atm
         """
-        if not hasI:
+        # Add I transform if one does not exist
+        lastindex = len(transforms) - 1
+        if lastindex < 0 or not np.allclose(transforms[lastindex], np.eye(transforms[lastindex].shape[0])):
             transforms = np.concatenate([transforms, [np.eye(2**n)]])
+
         self.t = transforms
         self.p = probabilities # not adding probability of I due to potential floating point issues
         self.k = len(self.p)
@@ -37,7 +42,7 @@ class Noise:
         t = np.kron(self.t, other.t)
         p = np.kron(append_last_p(self.p), append_last_p(other.p))[:-1] # remove I probability because...
         n = self.n + other.n
-        return Noise(n, p, t, hasI=True)
+        return Noise(n, p, t)
 
 
     # Randomly chooses a noise transformation to be applied. Watch out for those nasty floating point errors!
@@ -47,11 +52,6 @@ class Noise:
         """
         row_i = np.random.choice(len(self.t), p=append_last_p(self.p))
         return self.t[row_i]
-
-# No Noise class. Essentially an I matrix with probability 1
-class NoNoise(Noise):
-    def __init__(self, n):
-        super().__init__(n, np.empty(0), np.empty((0, 2**n, 2**n)))
 
 # Generic Gate class. by default it is Identity with default noise model
 class Gate:
@@ -65,8 +65,10 @@ class Gate:
         """
         if noise is None:
             noise = NoNoise(n)
+
         if transform is None:
             transform = np.eye(2**n)
+
         self.u = transform
         self.noise = noise
         self.n = n
@@ -96,3 +98,114 @@ class Gate:
         else:
             vec = self.u @ register.as_vec()
         return Register(n=len(vec), amplitudes=vec)
+
+#########################################################################################
+############ Functional Noise Models ####################################################
+#########################################################################################
+
+# No Noise class. Essentially an I matrix with probability 1
+class NoNoise(Noise):
+    def __init__(self, n):
+        super().__init__(n, np.empty(0), np.empty((0, 2**n, 2**n)))
+
+# Bit flip noise on n bits (apply X)
+class XNoise(Noise):
+    def __init__(self, n, p):
+        if p < 0.0 or p > 1.0:
+            raise ValueError("probability out of range [0.0, 1.0]")
+
+        pi = [p, 1.0 - p]
+        ti = [X, np.eye(2)]
+        p = pi
+        t = ti
+
+        for _ in range(n-1):
+            pi = np.kron(p, pi)
+            ti = np.kron(t, ti)
+
+        super().__init__(n, pi[:-1], ti)
+
+# Y noise on n bits (apply Y)
+class YNoise(Noise):
+    def __init__(self, n, p):
+        if p < 0.0 or p > 1.0:
+            raise ValueError("probability out of range [0.0, 1.0]")
+        
+        pi = [p, 1.0 - p]
+        ti = [Y, np.eye(2)]
+        p = pi
+        t = ti
+
+        for _ in range(n-1):
+            pi = np.kron(p, pi)
+            ti = np.kron(t, ti)
+
+        super().__init__(n, pi[:-1], ti)
+
+# dephasing noise on n bits (apply Z)
+class ZNoise(Noise):
+    def __init__(self, n, p):
+        if p < 0.0 or p > 1.0:
+            raise ValueError("probability out of range [0.0, 1.0]")
+        
+        pi = [p, 1.0 - p]
+        ti = [Z, np.eye(2)]
+        p = pi
+        t = ti
+
+        for _ in range(n-1):
+            pi = np.kron(p, pi)
+            ti = np.kron(t, ti)
+
+        super().__init__(n, pi[:-1], ti)
+
+
+# Pauli noise independently on n bits.
+class PauliNoise(Noise):
+    def __init__(self, n, px, py, pz):
+        if px < 0.0 or py < 0.0 or pz < 0.0 or px + py + pz > 1.0:
+            raise ValueError("probability out of range [0.0, 1.0]")
+
+        pi = []
+        ti = []
+
+        if px:
+            pi += [px]
+            ti += [X]
+        if py:
+            pi += [py]
+            ti += [Y]
+        if pz:
+            pi += [pz]
+            ti += [Z]       
+
+        pi += [1.0 - sum(pi)]
+        ti += [np.eye(2)]
+        p = pi
+        t=ti
+
+        for _ in range(n-1):
+            pi = np.kron(p, pi)
+            ti = np.kron(t, ti)
+
+        super().__init__(n, pi[:-1], ti)
+
+#########################################################################################
+############ Functional Gates ###########################################################
+#########################################################################################
+
+# Hadamard on one qubit
+class Hadamard(Gate):
+    def __init__(self, noise = None):
+        super().__init__(1, H, noise)
+
+# Walsh on n qubits
+class Walsh(Gate):
+    def __init__(self, n, noise = None):
+
+        t = H
+        for _ in range(n-1):
+            t = np.kron(H, t)
+
+        super().__init__(n, t, noise)
+    
