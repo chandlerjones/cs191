@@ -309,6 +309,7 @@ class Register(np.ndarray):
         for i in range(N):
             x = [0] * N
             x[i] = self.amplitudes[i]
+            x = complex(x)
             ket = Register(amplitudes=x)
             bra = Register(amplitudes=x)
             bra.bra()
