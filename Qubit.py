@@ -90,9 +90,7 @@ class Qubit(np.ndarray):
         return Qubit(vec=(a, b))
 
     def __repr__(self):
-        nonzero = []
-        nonzero.append(self.alpha)
-        nonzero.append(self.beta)
+        nonzero = [self.alpha, self.beta]
         ret = ""
         for i in range(2):
             if nonzero[i] == 0:
