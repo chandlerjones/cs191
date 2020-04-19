@@ -220,7 +220,7 @@ class Register(np.ndarray):
                     ret += ' + '
         return ret
 
-    # measure function for shors; returns int
+    # measure function for shor's; returns int
     def measure(self):
         probs = [abs(x) ** 2 for x in self.amplitudes]
         sample = np.random.random()
@@ -326,4 +326,3 @@ class Register(np.ndarray):
             bra.bra()
             rho += (ket * bra)
         return rho
-
