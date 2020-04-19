@@ -284,9 +284,7 @@ class Register(np.ndarray):
         w = H
         for i in range(self.n - 1):
             w = np.kron(w, H)
-            out = np.matmul(w, vec)
-            out = np.around(out, decimals=9)
-        return Register(amplitudes=out)
+        return Register(amplitudes=np.around(np.matmul(w, vec), 9))
 
     # Quantum Fourier Transform operation
     def QFT(self):
@@ -309,11 +307,10 @@ class Register(np.ndarray):
     @property
     def density(self):
         N = 2 ** self.n
-        rho = np.zeros((N, N))
+        rho = np.zeros((N, N), dtype=complex)
         for i in range(N):
             x = [0] * N
             x[i] = self.amplitudes[i]
-            x = complex(x)
             ket = Register(amplitudes=x)
             bra = Register(amplitudes=x)
             bra.bra()
