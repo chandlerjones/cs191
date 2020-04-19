@@ -222,7 +222,7 @@ class Register(np.ndarray):
 
     # measure function for shor's; returns int
     def measure(self):
-        probs = [abs(x) ** 2 for x in self.amplitudes]
+        probs = [abs(x)**2 for x in self.amplitudes]
         sample = np.random.random()
         cumul_prob = 0
         for i in range(2 ** self.n):
