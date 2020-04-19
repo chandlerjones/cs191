@@ -60,6 +60,8 @@ Register Class
 -self.purity: gives the purity of the state (1 for pure state, 0.5 for maximally mixed)
 -self.density: returns the density matrix of the state
 
+
+
 Examples:
 
 ########## WALSH-HADAMARD AND STATE MULTIPLICATION ##########
@@ -104,5 +106,49 @@ array([[0.5, 0.5, 0.5, 0.5],
 
 
 
+########################### Gate.py ##############################
+
+Gate Class
+-description: represents a generic gate with noise. Can be directly instantiated but it's best to inherit from
+              this class to program specific gates.
+-initialization:
+    inputs: n [Required] : number of bits.
+            transform=None : a single 2^n x 2^n matrix transformation applied by the gate.
+            noise=None : Noise instance specifies the noise. If not provided, will use no noise.
+    output: Gate object
+-self.__mul__(other): tensor product between two gates. Also automatically combines the noise models.
+-self.apply(register): apply the gate to a specified register nondestructively. Returns new register.
+
+Hadamard Class
+-description: Creates a hadamard gate on a single qubit with specified noise channel.
+
+Walsh Class
+-description: Creates a walsh gate on n qubits with specified noise channel.
+
+
+Noise Class
+-description: represents a noise channel. Can be directly instantiated but it's best to inherit from this class
+              to apply specific kinds of noise.
+-initialization:
+    inputs: n [Required] : number of bits.
+            probabilities [Required] : list of probabilities of each noise transform. Do not include I probability!
+            transforms [Required] : list of transforms to be applied with probability specified. Do not include I!
+-self.__mul__(other): "tensor product of noise." Returns a noise channel that supports n1 + n2 bits.
+-self.eval(): evaluates the noise once. Returns a transformation matrix to be applied to a register.
+
+NoNoise Class
+-description: Default noise channel used when no channel is specified. See code for usage.
+
+XNoise Class
+-description: Bit flip with probability p on each of n bits. See code for usage.
+
+YNoise Class
+-description: Apply Pauli Y with probability p on each of n bits. See code for usage.
+
+ZNoise Class
+-description: Apply dephasing with probability p on each of n bits. See code for usage.
+
+PauliNoise Class
+-description: Apply one of X, Y, Z with probabilities px, py, pz on each of n bits. See code for usage.
          
         
