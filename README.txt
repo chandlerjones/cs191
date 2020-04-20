@@ -39,6 +39,8 @@ Qubit Class
               vec=(1, 0) (input the amplitudes directly)       
       outputs: Qubit object      
 -__mul__: defaults to np.matmul
+-pauli(self, op): performs the pauli matrix given in argument OP {'X', 'Y', 'Z'}
+-hadamard(self): performs a single-qubit hadamard operation
 -measure: returns one of the basis vectors with probability = square of amplitudes
 
 Register Class
