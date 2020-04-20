@@ -29,7 +29,7 @@ def main(N, attempts=None):
 	if not attempts:
 		attempts = 2*int(log(N, 2))
 
-	it = attempts + 1
+
 	guesses = []
 	tries = 0
 	while len(guesses) == 0 and tries < 2:
@@ -52,7 +52,7 @@ def main(N, attempts=None):
 			factor = None
 
 	if tries == 2:
-		print("\n\nNot able to find any factors after 2 attempts\n\nI'm so sorry I failed you".format(N))
+		print("\n\nNot able to find any factors after 2 attempts\n\nI'm so sorry I failed you")
 		return None
 	return factor
 
