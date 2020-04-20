@@ -3,7 +3,7 @@ from Qubit import *
 from math import ceil, log, sqrt
 from collections import Counter
 from statistics import mode
-
+from fractions import Fraction
 
 """Simulation of Shor's Algorithm based off of the "Register Class" written by Chandler Jones.
 Some code below is not used in the actual "implementation" but still written to remain faithful
@@ -27,18 +27,33 @@ def main(N, attempts=None):
 			return 5
 
 	if not attempts:
-		attempts = int(log(N, 2))
+		attempts = 2*int(log(N, 2))
 
 	it = attempts + 1
 	guesses = []
-	while attempts:
-		print("Iteration {}".format(it - attempts))
-		guess = shors_alg(N)
-		if guess:
-			guesses.append(guess)
-		attempts -= 1
-	factor = mode(guesses)
+	tries = 0
+	while len(guesses) == 0 and tries < 2:
+		for i in range(attempts):
+			print("\n•••••••••••••••••\nIteration {} of {}\n•••••••••••••••••\n".format(i+1, attempts))
+			guess = shors_alg(N)
+			if guess:
+				guesses.append(guess)
+		if len(guesses) == 0 and tries == 0:
+			print("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nOnly Encountered Degenerate Cases--Trying Again\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+		tries += 1
 
+
+	try:
+		factor = mode(guesses)
+	except:
+		if len(guesses) > 0:
+			print("\nNo Potential Factor Most Likely")
+			print("Potential factors are: {}".format(guesses))
+			factor = None
+
+	if tries == 2:
+		print("\n\nNot able to find any factors after 2 attempts\n\nI'm so sorry I failed you".format(N))
+		return None
 	return factor
 
 
@@ -60,6 +75,7 @@ def euclid_alg(a, b, x=1, y=1):
 def shors_alg(N):
 
 	a = np.random.randint(1, N)
+	print("The random number is {}".format(a))
 
 	#Again turned off to focus on quantum aspects of alg; checks to see if factor randomly chosen
 	if False:
@@ -108,22 +124,35 @@ def shors_alg(N):
 
 	#Measurement used in finding the period
 	C = source.measure()
+	print("Measured {} from the first register and {} from the second".format(r, C))
+
+	#This is "cheating" but cont_fraction_expansion fails for C = 0
+	if C == 0:
+		print("Retrying this iteration (need non-zero value)\n")
+		return shors_alg(N)
 
 	#Determining the period; based off of Box 8.1 in the text; classical
 	r = cont_fraction_expansion(C, Q, N)
+	print("Found the period to be {}".format(r))
 
 	#check to make sure we're in the good case: r even and a**(r/2) = -1 mod N
-	if not ((r % 2 == 0) and ((a**(r//2) % N) == N-1)):
-		print("The random number chosen was {} which resulted in a degenerate case\n".format(a))
+	if not ((r % 2 != 0) or ((a**(r//2) % N) == N-1)):
+		print("\nDegenerate Case\n")
 		return None
 
-	#Find a factor
+	#Find a potential factor
 	y = a**(r//2)
-	guess = euclid_alg(N, y-1)
-	guess = guess if (guess != 1) else euclid_alg(N, y+1)
+	guess1 = euclid_alg(N, y-1)
+	guess2 = euclid_alg(N, y+1)
 
-	print("The random number chosen was {} which yielded the guess {}\n".format(a, guess))
-	return guess
+	if guess1 != 1 and guess1 != N:
+		print("\nFound potential factor {}\n".format(guess1))
+		return guess1
+	elif guess2 != 1 and guess2 != N:
+		print("\nFound potential factor {}\n".format(guess2))
+		return guess2
+	print("\nDid not yield non-trivial factor")
+	return None
 
 #Computes the period; see Box 8.1/pg 167 in the text
 def cont_fraction_expansion(C, Q, N):
@@ -134,14 +163,19 @@ def cont_fraction_expansion(C, Q, N):
 	p_0 = a_0
 	q_0 = 1
 
-	a = int(1/(eps_0-1))
-	eps = 1/(eps_0)-a
+	a = int(1/(eps_0))
+	eps = 1/(eps_0) - a
+
+	#I think if this happens we're in the easy case where we just need to reduce C/Q
+	if eps == 0:
+		r = Fraction(C, Q).denominator
+		return r
 
 	p_1 = a*a_0 + 1
 	q_1 = a
 
-	if q_1 <= N:
-		return q_1
+	if q_0 < N and N <= q_1:
+		return q_0
 
 	a = int(1/(eps))
 	eps = 1/eps-a
@@ -151,24 +185,28 @@ def cont_fraction_expansion(C, Q, N):
 	prev_p = p_1
 
 	#iteration starts with current q_i = q_2; after first loop have q_3
-	while not (prev_q < q <= N):
-		a = int(1/(eps-1))
+	while not (prev_q < N and N <= q):
+		a = int(1/(eps))
 		eps = 1/eps-a
+		temp_p = p
+		temp_q = q
 		p = a*p + prev_p
 		q = a*q + prev_q
-
-	return q
-
-
-
+		prev_p = temp_p
+		prev_q = temp_q
+	return prev_q
 
 
-N = input("Which number would you like to factor?\n")
+
+#Takes in user input and runs it
+N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, less than 23 is best.\n")
+N = int(N)
 attempts = input("\n\nHow many iterations of Shor's Algorithm would you like to run?\nMore gives higher probability of success; type 'd' for the default.\n")
 if attempts == "d":
 	attempts = None
 else:
 	attempts = int(attempts)
 
-factor = main(int(N), attempts)
-print("\n\nWe found the factors {}, {}. There may be others".format(factor, N//factor))
+factor = main(N, attempts)
+if factor:
+	print("\nWe found the factor {} with corresponding factor {}. There may be others".format(factor, N//factor))
