@@ -190,6 +190,23 @@ class PauliNoise(Noise):
 
         super().__init__(n, pi[:-1], ti)
 
+# Amplitude Damping error
+class DampingNoise(Noise):
+    def __init__(self, n, p):
+        if p < 0.0 or p > 1.0:
+            raise ValueError("probability out of range [0.0, 1.0]")
+
+        pi = [p, 1.0 - p]
+        K_0 = np.sqrt
+        ti = [K_0, np.eye(2)]
+        p = pi
+        t = ti
+
+        for _ in range(n-1):
+            pi = np.kron(p, pi)
+            ti = np.kron(t, ti)
+
+        super().__init__(n, pi[:-1], ti)
 #########################################################################################
 ############ Functional Gates ###########################################################
 #########################################################################################

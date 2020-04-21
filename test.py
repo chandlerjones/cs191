@@ -21,7 +21,6 @@ c = Gate(1, H) * Gate(1)
 r = c.apply(r)
 assert np.isclose(r.as_vec(),[2**-0.5, 0, 2**-0.5, 0]).all()
 
-
 # Test Bit Flip
 r = Register(n=2)
 n = XNoise(2, 0.5)
@@ -43,5 +42,13 @@ for _ in range(10000):
     agg += g1.apply(g2.apply(g1.apply(r)))
 
 assert (agg[::2] > 2350).all() and (agg[::2] < 2650).all()
+
+# Test damping
+r = Register(n=2)
+n = DampingNoise(2, 0.1)
+gate = Gate(2, noise=n)
+
+import code
+code.interact(local=locals())
 
 print ("All is Good!")
