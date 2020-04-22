@@ -51,7 +51,7 @@ def main(N, attempts=None):
 			print("Potential factors are: {}".format(guesses))
 			factor = None
 
-	if tries == 2:
+	if tries == 2 and len(guesses) == 0:
 		print("\n\nNot able to find any factors after 2 attempts\n\nI'm so sorry I failed you")
 		return None
 	return factor
@@ -101,12 +101,15 @@ def shors_alg(N):
 		amps.append(sqrt(tally.get(i, 0)/Q))
 	target = Register(amplitudes=amps)
 
+
+
 	#Choosing an order r and setting second register to align with measurement
 	r = target.measure()
 	amps = 2**n * [0]
 	amps[r] = 1
 	target = Register(amplitudes=amps)
 	#Second register no longer relevant
+	print("Measured {} from the target register".format(r))
 
 	#Collapse first register to be consistent with measurement
 	total = 0
@@ -119,25 +122,29 @@ def shors_alg(N):
 	amps = [sqrt(1/total) * x for x in amps]
 	source = Register(amplitudes=amps)
 
+
 	#Apply QFT to first register to bring out the period
 	source = source.QFT()
 
+
 	#Measurement used in finding the period
 	C = source.measure()
-	print("Measured {} from the first register and {} from the second".format(r, C))
+	print("Measured {} from the source register".format(C))
+
 
 	#This is "cheating" but cont_fraction_expansion fails for C = 0
+	#This case unlikely for the size of numbers meant to be used for Shor's
 	if C == 0:
-		print("Retrying this iteration (need non-zero value)\n")
+		print("Retrying this iteration (need non-zero measurement from source)\n")
 		return shors_alg(N)
 
 	#Determining the period; based off of Box 8.1 in the text; classical
 	r = cont_fraction_expansion(C, Q, N)
 	print("Found the period to be {}".format(r))
 
-	#check to make sure we're in the good case: r even and a**(r/2) = -1 mod N
-	if not ((r % 2 != 0) or ((a**(r//2) % N) == N-1)):
-		print("\nDegenerate Case\n")
+	#check to make sure we're r is not odd
+	if r % 2 != 0:
+		print("\nDegenerate Case: r ({}) is odd".format(r))
 		return None
 
 	#Find a potential factor
@@ -199,7 +206,7 @@ def cont_fraction_expansion(C, Q, N):
 
 
 #Takes in user input and runs it
-N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, less than 23 is best.\n")
+N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, numbers around 21 work best.\n")
 N = int(N)
 attempts = input("\n\nHow many iterations of Shor's Algorithm would you like to run?\nMore gives higher probability of success; type 'd' for the default.\n")
 if attempts == "d":
