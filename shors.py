@@ -135,6 +135,11 @@ def shors_alg(N, noise_type=0, noise=0):
 	source = source.walsh(noise_prob=noise)
 	source = source.walsh(noise_prob=0)
 
+
+	# Measurement used in finding the period
+	C = source.measure()
+	print("Measured {} from the source register".format(C))
+
 	plt.plot([abs(x) for x in source.amplitudes])
 	plt.title("Register Amplitudes after QFT\nNoise Probability: {}%; Noise Type: {}; Random Number: {}".format(int(noise * 100),
 																								  noises[noise_type], a))
@@ -142,10 +147,6 @@ def shors_alg(N, noise_type=0, noise=0):
 	plt.ylabel("Amplitudes")
 	plt.show()
 	plt.clf()
-
-	# Measurement used in finding the period
-	C = source.measure()
-	print("Measured {} from the source register".format(C))
 
 	# This is "cheating" but cont_fraction_expansion fails for C = 0
 	# This case unlikely for the size of numbers meant to be used for Shor's
