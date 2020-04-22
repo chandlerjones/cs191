@@ -5,6 +5,7 @@ from collections import Counter
 from statistics import mode
 from fractions import Fraction
 from matplotlib import pyplot as plt
+import Gate
 
 """Simulation of Shor's Algorithm based off of the "Register Class" written by Chandler Jones.
 Some code below is not used in the actual "implementation" but still written to remain faithful
