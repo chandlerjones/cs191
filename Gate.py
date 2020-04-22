@@ -197,7 +197,7 @@ class DampingNoise(Noise):
             raise ValueError("probability out of range [0.0, 1.0]")
 
         pi = [p, 1.0 - p]
-        K_0 = np.sqrt
+        K_0 = np.sqrt([[1, np.sqrt(p)], [0, np.sqrt(1-p)]])
         ti = [K_0, np.eye(2)]
         p = pi
         t = ti

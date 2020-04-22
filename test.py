@@ -1,3 +1,4 @@
+from Qubit import *
 from Gate import *
 
 # Test NoNoise class.
@@ -48,7 +49,10 @@ r = Register(n=2)
 n = DampingNoise(2, 0.1)
 gate = Gate(2, noise=n)
 
-import code
-code.interact(local=locals())
+amplitudes = np.copy(r.amplitudes)
+for _ in range(100):
+    r = gate.apply(r)
+
+assert (r.amplitudes[0] > amplitudes[0])
 
 print ("All is Good!")
