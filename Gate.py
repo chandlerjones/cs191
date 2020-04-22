@@ -1,4 +1,4 @@
-from Qubit import *
+import Qubit
 import numpy as np
 import math 
 
@@ -6,7 +6,7 @@ import math
 ############ Generic Classes and Functions ##############################################
 #########################################################################################
 
-# countermeasure for forseeable floating point issues when doing tensor products.
+# countermeasure for foreseeable floating point issues when doing tensor products.
 def append_last_p(p):
     return np.append(p, [1.0 - sum(p)])
 
@@ -97,7 +97,7 @@ class Gate:
             vec = self.noise.eval() @ self.u @ register.as_vec()
         else:
             vec = self.u @ register.as_vec()
-        return Register(n=len(vec), amplitudes=vec)
+        return Qubit.Register(n=len(vec), amplitudes=vec)
 
 #########################################################################################
 ############ Functional Noise Models ####################################################
@@ -115,7 +115,7 @@ class XNoise(Noise):
             raise ValueError("probability out of range [0.0, 1.0]")
 
         pi = [p, 1.0 - p]
-        ti = [X, np.eye(2)]
+        ti = [Qubit.X, np.eye(2)]
         p = pi
         t = ti
 
@@ -132,7 +132,7 @@ class YNoise(Noise):
             raise ValueError("probability out of range [0.0, 1.0]")
         
         pi = [p, 1.0 - p]
-        ti = [Y, np.eye(2)]
+        ti = [Qubit.Y, np.eye(2)]
         p = pi
         t = ti
 
@@ -149,7 +149,7 @@ class ZNoise(Noise):
             raise ValueError("probability out of range [0.0, 1.0]")
         
         pi = [p, 1.0 - p]
-        ti = [Z, np.eye(2)]
+        ti = [Qubit.Z, np.eye(2)]
         p = pi
         t = ti
 
@@ -171,13 +171,13 @@ class PauliNoise(Noise):
 
         if px:
             pi += [px]
-            ti += [X]
+            ti += [Qubit.X]
         if py:
             pi += [py]
-            ti += [Y]
+            ti += [Qubit.Y]
         if pz:
             pi += [pz]
-            ti += [Z]       
+            ti += [Qubit.Z]
 
         pi += [1.0 - sum(pi)]
         ti += [np.eye(2)]
@@ -214,15 +214,14 @@ class DampingNoise(Noise):
 # Hadamard on one qubit
 class Hadamard(Gate):
     def __init__(self, noise = None):
-        super().__init__(1, H, noise)
+        super().__init__(1, Qubit.H, noise)
 
 # Walsh on n qubits
 class Walsh(Gate):
     def __init__(self, n, noise = None):
 
-        t = H
+        t = Qubit.H
         for _ in range(n-1):
-            t = np.kron(H, t)
+            t = np.kron(Qubit.H, t)
 
         super().__init__(n, t, noise)
-    
