@@ -4,7 +4,6 @@ from math import ceil, log, sqrt
 from collections import Counter
 from statistics import mode
 from fractions import Fraction
-from matplotlib import pyplot as plt
 
 """Simulation of Shor's Algorithm based off of the "Register Class" written by Chandler Jones.
 Some code below is not used in the actual "implementation" but still written to remain faithful
@@ -75,11 +74,7 @@ def euclid_alg(a, b, x=1, y=1):
 #Computes one iteration of Shor's Algorithm
 def shors_alg(N):
 
-	noise = .05
-	noise_type = 1
-	noises = { 1: "XNoise", 2: "YNoise", 3: "ZNoise", 4: "PauliNoise", 5: "DampingNoise"}
 	a = np.random.randint(1, N)
-	a = 11
 	print("The random number is {}".format(a))
 
 	#Again turned off to focus on quantum aspects of alg; checks to see if factor randomly chosen
@@ -89,16 +84,9 @@ def shors_alg(N):
 
 	K, n = ceil(log(N**2, 2)), ceil(log(N, 2))
 	Q = 2**K
-	source = Register(K, noise=noise_type)
-	source = source.walsh(noise_prob=noise) #can also use qft; walsh slightly faster & doesnt introduce complex
+	source = Register(K)
+	source = source.walsh() #can also use qft; walsh slightly faster & doesnt introduce complex
 	target = Register(K)
-
-	plt.plot([abs(x) for x in source.amplitudes])
-	plt.title("Source Register Amplitudes after Walsh-Hadamard; Noise Probability {}%; Noise Type {}".format(int(noise*100), noises[noise_type]))
-	plt.savefig("plots/post_walsh_noise_{}_type_{}".format(noise, noise_type))
-	plt.close()
-
-
 
 	#Quantum oracle U_f where f(x) = a^x mod N
 	vals = []
@@ -113,10 +101,6 @@ def shors_alg(N):
 		amps.append(sqrt(tally.get(i, 0)/Q))
 	target = Register(amplitudes=amps)
 
-	plt.plot([abs(x) for x in target.amplitudes])
-	plt.title("Target Register Amplitudes after Measurement; Noise Probability {}%; Noise Type {}".format(int(noise*100), noises[noise_type]))
-	plt.savefig("plots/post_measure_t_noise_{}_type_{}".format(noise, noise_type))
-	plt.close()
 
 
 	#Choosing an order r and setting second register to align with measurement
@@ -138,18 +122,10 @@ def shors_alg(N):
 	amps = [sqrt(1/total) * x for x in amps]
 	source = Register(amplitudes=amps)
 
-	plt.plot([abs(x) for x in source.amplitudes])
-	plt.title("Source Register Amplitudes after Measurement of Target; Noise Probability {}%; Noise Type {}".format(int(noise*100), noises[noise_type]))
-	plt.savefig("plots/post_measure_s_noise_{}_type_{}".format(noise, noise_type))
-	plt.close()
 
 	#Apply QFT to first register to bring out the period
 	source = source.QFT()
 
-	plt.plot([abs(x) for x in source.amplitudes])
-	plt.title("Source Register Amplitudes after QFT; Noise Probability {}%; Noise Type {}".format(int(noise*100), noises[noise_type]))
-	plt.savefig("plots/post_qft_noise_{}_type_{}".format(noise, noise_type))
-	plt.close()
 
 	#Measurement used in finding the period
 	C = source.measure()
@@ -230,15 +206,14 @@ def cont_fraction_expansion(C, Q, N):
 
 
 #Takes in user input and runs it
+N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, numbers around 21 work best.\n")
+N = int(N)
+attempts = input("\n\nHow many iterations of Shor's Algorithm would you like to run?\nMore gives higher probability of success; type 'd' for the default.\n")
+if attempts == "d":
+	attempts = None
+else:
+	attempts = int(attempts)
 
-# N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, numbers around 21 work best.\n")
-# N = int(N)
-# attempts = input("\n\nHow many iterations of Shor's Algorithm would you like to run?\nMore gives higher probability of success; type 'd' for the default.\n")
-# if attempts == "d":
-# 	attempts = None
-# else:
-# 	attempts = int(attempts)
-N, attempts = 21, 1
 factor = main(N, attempts)
 if factor:
 	print("\nWe found the factor {} with corresponding factor {}. There may be others".format(factor, N//factor))
