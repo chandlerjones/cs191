@@ -16,7 +16,7 @@ Author: Harrison Costantino"""
 
 
 # Main loop; N is number to factor
-def main(N, attempts=None):
+def main(N, attempts=None, noise_type=0, noise=0):
 	# quick check of small primes
 	# turned off to demonstrate quantum pieces of alg
 	if False:
@@ -35,7 +35,7 @@ def main(N, attempts=None):
 	while len(guesses) == 0 and tries < 2:
 		for i in range(attempts):
 			print("\n•••••••••••••••••\nIteration {} of {}\n•••••••••••••••••\n".format(i + 1, attempts))
-			guess = shors_alg(N)
+			guess = shors_alg(N, noise_type, noise)
 			if guess:
 				guesses.append(guess)
 		if len(guesses) == 0 and tries == 0:
@@ -228,8 +228,12 @@ if attempts == "d":
 	attempts = None
 else:
 	attempts = int(attempts)
-	
-factor = main(N, attempts)
+noise_type = int(input("\nWould you like noise? Enter corresponding number\n0: No Noise, 1: XNoise, 2: YNoise, 3: ZNoise\n"))
+if noise_type != 0:
+	noise_prob = float(input("\nWhat is the probability of error? (Enter decimal from 0-1)\n"))
+else:
+	noise_prob = 0
+factor = main(N, attempts, noise_type, noise_prob)
 if factor:
 	print("\nWe found the factor {} with corresponding factor {}. There may be others".format(factor, N // factor))
 
