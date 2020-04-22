@@ -1,9 +1,9 @@
 import numpy as np
-import sys, os
 import warnings
+import random
 import Gate
-warnings.filterwarnings('ignore')
 
+warnings.filterwarnings('ignore')
 
 # Hadamard Gate
 H = (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]])
@@ -132,7 +132,7 @@ class Qubit(np.ndarray):
         if self.noise is None:
             p = np.matmul(self, H)
         else:
-            p = np.matmul(self. Gate.Hadamard(self.noise(self.n, noise_prob)))
+            p = np.matmul(self.Gate.Hadamard(self.noise(self.n, noise_prob)))
         return Qubit(vec=(p[0], p[1]))
 
     def measure(self):
@@ -259,7 +259,6 @@ class Register(np.ndarray):
                     ret += ' + '
         return ret
 
-
     # measure function for shor's; returns int
     def measure(self):
         probs = [abs(x) ** 2 for x in self.amplitudes]
@@ -352,7 +351,7 @@ class Register(np.ndarray):
             amps.append(total)
         amps = np.asarray(amps)
         amps *= const
-        return Register(amplitudes=amps, ket=self.ket)
+        return Register(amplitudes=amps, ket=self.ket, noise=self.noise)
 
     @property
     def purity(self):

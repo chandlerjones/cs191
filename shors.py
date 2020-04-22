@@ -90,7 +90,7 @@ def shors_alg(N):
     source = Register(K, noise=noise_type)
     source = source.walsh(noise_prob=noise)  # can also use qft; walsh slightly faster & doesnt introduce complex
     target = Register(K)
-
+    """
     plt.plot([abs(x) for x in source.amplitudes])
     plt.title(
         "Source Register Amplitudes after Walsh-Hadamard; Noise Probability {}%; Noise Type {}".format(int(noise * 100),
@@ -98,7 +98,7 @@ def shors_alg(N):
                                                                                                            noise_type]))
     plt.savefig("plots/post_walsh_noise_{}_type_{}.png".format(noise, noise_type))
     plt.close()
-
+    """
     # Quantum oracle U_f where f(x) = a^x mod N
     vals = []
     for q in range(Q):
@@ -111,14 +111,14 @@ def shors_alg(N):
     for i in range(Q):
         amps.append(sqrt(tally.get(i, 0) / Q))
     target = Register(amplitudes=amps, noise=noise_type)
-
+    """
     plt.plot([abs(x) for x in target.amplitudes])
     plt.title(
         "Target Register Amplitudes after Measurement; Noise Probability {}%; Noise Type {}".format(int(noise * 100),
-                                                                                                    noises[noise_type]))
+                                                                                                     noises[noise_type]))
     plt.savefig("plots/post_measure_t_noise_{}_type_{}.png".format(noise, noise_type))
     plt.close()
-
+    """
     # Choosing an order r and setting second register to align with measurement
     r = target.measure()
     amps = 2 ** n * [0]
@@ -138,15 +138,15 @@ def shors_alg(N):
     amps = [sqrt(1 / total) * x for x in amps]
     # sample = np.random.random()
     source = Register(amplitudes=amps, noise=noise_type)
-    source = source.walsh(noise_prob=0.5)
+    source = source.walsh(noise_prob=noise)
     source = source.walsh(noise_prob=0)
-
+    """
     plt.plot([abs(x) for x in source.amplitudes])
     plt.title("Source Register Amplitudes after Measurement of Target; Noise Probability {}%; Noise Type {}".format(
         int(noise * 100), noises[noise_type]))
     plt.savefig("plots/post_measure_s_noise_{}_type_{}.png".format(noise, noise_type))
     plt.close()
-
+    """
     # Apply QFT to first register to bring out the period
     source = source.QFT()
     source = source.walsh(noise_prob=1)
@@ -156,7 +156,7 @@ def shors_alg(N):
     plt.title("Source Register Amplitudes after QFT; Noise Probability {}%; Noise Type {}".format(int(noise * 100),
                                                                                                   noises[noise_type]))
     plt.savefig("plots/post_qft_noise_{}_type_{}.png".format(noise, noise_type))
-    plt.close()
+    plt.show()
 
     # Measurement used in finding the period
     C = source.measure()
@@ -242,7 +242,7 @@ def cont_fraction_expansion(C, Q, N):
 # run?\nMore gives higher probability of success; type 'd' for the default.\n")
 # if attempts == "d": attempts = None
 # else: attempts = int(attempts)
-N, attempts = 21, 1
+N, attempts = 21, 3
 factor = main(N, attempts)
 if factor:
     print("\nWe found the factor {} with corresponding factor {}. There may be others".format(factor, N // factor))

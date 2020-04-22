@@ -1,6 +1,5 @@
 import numpy
 from qiskit_shor import *
-# import shors
 from qiskit import QuantumCircuit, QuantumRegister
 from Qubit import *
 from qiskit import IBMQ
@@ -14,7 +13,7 @@ def main():
     print('################################################################', '\n')
     print('We begin with single Qubit objects:')
     phi = Qubit()
-    print('phi =', phi.__repr__(), '\n')
+    print('phi =', phi.__repr__(), '\n', '\n', '\n', '\n')
     print('We can apply transformations such as the Pauli matrices and the Hadamard Gate:')
     px = phi.pauli('X')
     py = phi.pauli('Y')
@@ -23,28 +22,28 @@ def main():
     print('X * phi = ', px.__repr__())
     print('Y * phi = ', py.__repr__())
     print('Z * phi = ', pz.__repr__())
-    print('H * phi = ', ph.__repr__(), '\n', '\n')
+    print('H * phi = ', ph.__repr__(), '\n', '\n', '\n', '\n')
 
     print('We now initialize two 3-qubit registers (x and y) to the zero state:')
     x = Register(3)
     y = Register(3)
     print('x =', x.__repr__())
-    print('y =', y.__repr__(), '\n')
+    print('y =', y.__repr__(), '\n', '\n', '\n', '\n')
     print('Create an equal superposition over all of the basis states with register x', '\n',
-          ' and take the conjugate transpose of register y to make it a bra:')
+          ' and take the conjugate transpose of register y to make it a bra:', '\n')
     x = x.walsh()
     print('x =', x.__repr__())
     y.bra()
-    print('y =', y.__repr__(), '\n')
+    print('y =', y.__repr__(), '\n', '\n', '\n')
     print('We expect the purity of x and y to be 1/8 (1/2^n, where n=3) and 1, respectively...')
     print('purity of x: ', x.purity)
-    print('purity of y:', y.purity, '\n')
+    print('purity of y:', y.purity, '\n', '\n', '\n')
     print('Taking their inner product (bra/ket) should result in a scalar value.', '\n',
           'Taking their outer product (ket/bra) should result in an 8x8 matrix operator, which we omit for brevity',
           '\n')
     p1 = y * x
     p2 = x * y
-    print('<y|x> =', p1, '\n')
+    print('<y|x> =', p1, '\n', '\n', '\n', '\n')
     # print('|x><y| =', p2, '\n', '\n')
 
     print('Measuring our register will return the index of the state measured.', '\n'
@@ -71,12 +70,19 @@ def main():
     print("Our bell state construction:")
     print(x.name, ': ', x.__repr__(), '\n', '\n')
 
+    print('#################################################################################')
+    print('############ Implementations of various forms of probabilistic noise ############')
+    print('#################################################################################', '\n')
+
+    print('Dephasing: Moving from surface of bloch sphere to the Z axis over time due to magnetic field.', '\n')
+    print('Bit Flip: Flip across Z plane. Probability of flipping from 1 to 0. Probability p of applying X.', '\n')
+    print('Depolarization: Moving toward origin of sphere. Equal probability p/3 of applying X, Y, or Z.', '\n')
+    print("Amplitude Damping: Moving toward north pole `|0>`. Also called Thermal relaxation. Probability of `|1> -> "
+          "|0>`", '\n', '\n')
+
     print('###############################################################################################')
     print('############ Test of Noiseless Implementation of Quantum Factoring Against Control ############')
     print('###############################################################################################', '\n')
-
-    print('Qiskit implementation (N=21)')
-    run_shor()
 
 
 if __name__ == "__main__":
