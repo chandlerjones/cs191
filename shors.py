@@ -135,13 +135,13 @@ def shors_alg(N, noise_type=0, noise=0):
 	source = source.walsh(noise_prob=noise)
 	source = source.walsh(noise_prob=0)
 
-	# plt.plot([abs(x) for x in source.amplitudes])
-	# plt.title("Register Amplitudes after QFT\nNoise Probability: {}%; Noise Type: {}; Random Number: {}".format(int(noise * 100),
-	# 																							  noises[noise_type], a))
-	# plt.xlabel("Basis States")
-	# plt.ylabel("Amplitudes")
-	# plt.savefig("plots/{}_type_{}_noise_post_qft.png".format(noise_type, noise))
-	# plt.clf()
+	plt.plot([abs(x) for x in source.amplitudes])
+	plt.title("Register Amplitudes after QFT\nNoise Probability: {}%; Noise Type: {}; Random Number: {}".format(int(noise * 100),
+																								  noises[noise_type], a))
+	plt.xlabel("Basis States")
+	plt.ylabel("Amplitudes")
+	plt.show()
+	plt.clf()
 
 	# Measurement used in finding the period
 	C = source.measure()
