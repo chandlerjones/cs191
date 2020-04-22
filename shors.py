@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from Qubit import *
 from math import ceil, log, sqrt
 from collections import Counter
@@ -72,11 +73,11 @@ def euclid_alg(a, b, x=1, y=1):
 
 # Computes one iteration of Shor's Algorithm
 def shors_alg(N):
-    noise = .05
+    noise = 0.5
     noise_type = 1
     noises = {1: "XNoise", 2: "YNoise", 3: "ZNoise", 4: "PauliNoise", 5: "DampingNoise"}
     a = np.random.randint(1, N)
-    a = 11
+    # a = 11
     print("The random number is {}".format(a))
 
     # Again turned off to focus on quantum aspects of alg; checks to see if factor randomly chosen
@@ -109,7 +110,7 @@ def shors_alg(N):
     amps = []
     for i in range(Q):
         amps.append(sqrt(tally.get(i, 0) / Q))
-    target = Register(amplitudes=amps)
+    target = Register(amplitudes=amps, noise=noise_type)
 
     plt.plot([abs(x) for x in target.amplitudes])
     plt.title(
@@ -122,7 +123,7 @@ def shors_alg(N):
     r = target.measure()
     amps = 2 ** n * [0]
     amps[r] = 1
-    target = Register(amplitudes=amps)
+    target = Register(amplitudes=amps, noise=noise_type)
     # Second register no longer relevant
     print("Measured {} from the target register".format(r))
 
@@ -135,7 +136,10 @@ def shors_alg(N):
             total += 1
             amps[q] = 1
     amps = [sqrt(1 / total) * x for x in amps]
-    source = Register(amplitudes=amps)
+    # sample = np.random.random()
+    source = Register(amplitudes=amps, noise=noise_type)
+    source = source.walsh(noise_prob=0.5)
+    source = source.walsh(noise_prob=0)
 
     plt.plot([abs(x) for x in source.amplitudes])
     plt.title("Source Register Amplitudes after Measurement of Target; Noise Probability {}%; Noise Type {}".format(
@@ -145,6 +149,8 @@ def shors_alg(N):
 
     # Apply QFT to first register to bring out the period
     source = source.QFT()
+    source = source.walsh(noise_prob=1)
+    source = source.walsh(noise_prob=0)
 
     plt.plot([abs(x) for x in source.amplitudes])
     plt.title("Source Register Amplitudes after QFT; Noise Probability {}%; Noise Type {}".format(int(noise * 100),
