@@ -74,7 +74,9 @@ def euclid_alg(a, b, x=1, y=1):
 
 # Computes one iteration of Shor's Algorithm
 def shors_alg(N, noise_type=0, noise=0):
+
 	noises = {0: "No Noise", 1: "XNoise", 2: "YNoise", 3: "ZNoise", 4: "PauliNoise", 5: "DampingNoise"}
+
 	a = np.random.randint(1, N)
 	print("The random number is {}".format(a))
 
@@ -133,13 +135,13 @@ def shors_alg(N, noise_type=0, noise=0):
 	source = source.walsh(noise_prob=noise)
 	source = source.walsh(noise_prob=0)
 
-	plt.plot([abs(x) for x in source.amplitudes])
-	plt.title("Register Amplitudes after QFT\nNoise Probability: {}%; Noise Type: {}; Random Number: {}".format(int(noise * 100),
-																								  noises[noise_type], a))
-	plt.xlabel("Basis States")
-	plt.ylabel("Amplitudes")
-	plt.savefig("plots/{}_type_{}_noise_post_qft.png".format(noise_type, noise))
-	plt.clf()
+	# plt.plot([abs(x) for x in source.amplitudes])
+	# plt.title("Register Amplitudes after QFT\nNoise Probability: {}%; Noise Type: {}; Random Number: {}".format(int(noise * 100),
+	# 																							  noises[noise_type], a))
+	# plt.xlabel("Basis States")
+	# plt.ylabel("Amplitudes")
+	# plt.savefig("plots/{}_type_{}_noise_post_qft.png".format(noise_type, noise))
+	# plt.clf()
 
 	# Measurement used in finding the period
 	C = source.measure()
@@ -219,21 +221,26 @@ def cont_fraction_expansion(C, Q, N):
 
 # Takes in user input and runs it
 
-# N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, numbers around 21
-# work best.\n")
-# N = int(N) attempts = input("\n\nHow many iterations of Shor's Algorithm would you like to
-# run?\nMore gives higher probability of success; type 'd' for the default.\n")
-# if attempts == "d": attempts = None
-# else: attempts = int(attempts)
-# factor = main(N, attempts)
-# if factor:
-# 	print("\nWe found the factor {} with corresponding factor {}. There may be others".format(factor, N // factor))
+N = input("Which number would you like to factor?\nHeavily recommend using numbers less than 33, numbers around 21 work best.\n")
+N = int(N)
+attempts = input("\n\nHow many iterations of Shor's Algorithm would you like to run?\nMore gives higher probability of success; type 'd' for the default.\n")
+if attempts == "d":
+	attempts = None
+else:
+	attempts = int(attempts)
+	
+factor = main(N, attempts)
+if factor:
+	print("\nWe found the factor {} with corresponding factor {}. There may be others".format(factor, N // factor))
 
 
-noise_types = [1, 2, 3, 4]
-noise_probs = [.05, .25, .5, .75, 1]
 
-shors_alg(21)
-for noise_type in noise_types:
-	for noise_prob in noise_probs:
-		shors_alg(21, noise_type, noise_prob)
+
+#For graphing
+
+# noise_types = [1, 2, 3, 4]
+# noise_probs = [.05, .25, .5, .75, 1]
+# shors_alg(21)
+# for noise_type in noise_types:
+# 	for noise_prob in noise_probs:
+# 		shors_alg(21, noise_type, noise_prob)
