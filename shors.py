@@ -152,7 +152,7 @@ def shors_alg(N, noise_type=0, noise=0):
 	# This case unlikely for the size of numbers meant to be used for Shor's
 	if C == 0:
 		print("Retrying this iteration (need non-zero measurement from source)\n")
-		return shors_alg(N)
+		return shors_alg(N, noise_type, noise)
 
 	# Determining the period; based off of Box 8.1 in the text; classical
 	r = cont_fraction_expansion(C, Q, N)
