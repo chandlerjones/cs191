@@ -1,13 +1,7 @@
 # cs191
 Quantum Circuit Simulation with Realistic Noise
-
-# TODO: 1) Algorithm Implementation(s) (probably Shor's? maybe a second?) -Harrison
-        2) Noise injection (See lecture 14 notes for possibilities) -Wyatt, Bradley, Jack for three different types
-        3) Error suppression methods (See lecture 16 notes) -Everyone, time permitting
-        4) Comparison with Cirq -Chandler
         
 ### Types of Single Qubit Error ###
-Please verify but from what I understand:
 #### Dephasing ####
 Moving from surface of bloch sphere to the Z axis over time due to magnetic field. jump no-jump p probability of applying Z.
 
